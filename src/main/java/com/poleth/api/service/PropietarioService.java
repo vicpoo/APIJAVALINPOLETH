@@ -5,6 +5,7 @@ import com.poleth.api.model.Propietario;
 import com.poleth.api.repository.PropietarioRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PropietarioService {
     private final PropietarioRepository propietarioRepository;
@@ -68,12 +69,12 @@ public class PropietarioService {
             if (propietario.getGmail().length() > 100) {
                 throw new IllegalArgumentException("El gmail no puede exceder 100 caracteres");
             }
-            
+
             // Verificar si el gmail ya existe
             if (existsByGmail(propietario.getGmail())) {
                 throw new IllegalArgumentException("El gmail '" + propietario.getGmail() + "' ya está registrado");
             }
-            
+
             // Validación básica de formato de email
             if (!isValidEmailFormat(propietario.getGmail())) {
                 throw new IllegalArgumentException("El formato del gmail no es válido");
@@ -109,12 +110,12 @@ public class PropietarioService {
             if (propietarioActualizado.getGmail().length() > 100) {
                 throw new IllegalArgumentException("El gmail no puede exceder 100 caracteres");
             }
-            
+
             // Validación básica de formato de email
             if (!isValidEmailFormat(propietarioActualizado.getGmail())) {
                 throw new IllegalArgumentException("El formato del gmail no es válido");
             }
-            
+
             // Verificar si el nuevo gmail ya existe (excluyendo el propietario actual)
             Optional<Propietario> propietarioConMismoGmail = propietarioRepository.findByGmail(propietarioActualizado.getGmail());
             if (propietarioConMismoGmail.isPresent() && !propietarioConMismoGmail.get().getIdPropietario().equals(id)) {
@@ -135,14 +136,14 @@ public class PropietarioService {
         return propietarioRepository.findById(id).isPresent();
     }
 
-    // Método para buscar propietarios por término (nombre o gmail)
+    // Método para buscar propietarios por término (nombre o gmail) - CORREGIDO
     public List<Propietario> searchPropietarios(String termino) {
         List<Propietario> todosPropietarios = propietarioRepository.findAll();
-        
+
         return todosPropietarios.stream()
                 .filter(p -> p.getNombre().toLowerCase().contains(termino.toLowerCase()) ||
-                            (p.getGmail() != null && p.getGmail().toLowerCase().contains(termino.toLowerCase())))
-                .toList();
+                        (p.getGmail() != null && p.getGmail().toLowerCase().contains(termino.toLowerCase())))
+                .collect(Collectors.toList());
     }
 
     // Método de validación básica de formato de email

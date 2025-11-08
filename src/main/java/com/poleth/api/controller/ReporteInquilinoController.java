@@ -12,6 +12,7 @@ import io.javalin.http.HttpStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ReporteInquilinoController {
     private final ReporteInquilinoService reporteInquilinoService;
@@ -58,7 +59,7 @@ public class ReporteInquilinoController {
             // Crear respuestas seguras sin problemas de lazy loading
             List<ReporteInquilinoResponse> safeResponses = reportesInquilinos.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -109,14 +110,14 @@ public class ReporteInquilinoController {
     public void deleteReporteInquilino(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Verificar si el reporte existe antes de eliminar
             if (!reporteInquilinoService.existsById(id)) {
                 ctx.status(HttpStatus.NOT_FOUND)
                         .json("Reporte no encontrado con ID: " + id);
                 return;
             }
-            
+
             reporteInquilinoService.deleteReporteInquilino(id);
             ctx.status(HttpStatus.NO_CONTENT);
         } catch (NumberFormatException e) {
@@ -136,7 +137,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByInquilino(idInquilino);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -153,7 +154,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByCuarto(idCuarto);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -176,7 +177,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByTipo(tipo);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -196,7 +197,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByEstado(estado);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -209,7 +210,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesAbiertos();
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -222,7 +223,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesCerrados();
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -236,7 +237,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesAbiertosByInquilino(idInquilino);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -253,7 +254,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesAbiertosByCuarto(idCuarto);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -276,7 +277,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByDescripcionContaining(texto);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -296,7 +297,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByAccionesTomadasContaining(texto);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -316,7 +317,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByNombreContaining(texto);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -329,7 +330,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesRecientes();
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -342,7 +343,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesUltimoMes();
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -354,7 +355,7 @@ public class ReporteInquilinoController {
         try {
             String tipo = ctx.queryParam("tipo");
             String estado = ctx.queryParam("estado");
-            
+
             if (tipo == null || tipo.isEmpty() || estado == null || estado.isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST)
                         .json("Los parámetros tipo y estado son requeridos");
@@ -364,7 +365,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesByTipoAndEstado(tipo, estado);
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -377,7 +378,7 @@ public class ReporteInquilinoController {
             List<ReporteInquilino> reportes = reporteInquilinoService.getReportesWithRelations();
             List<ReporteInquilinoResponse> safeResponses = reportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -410,15 +411,15 @@ public class ReporteInquilinoController {
     public void cerrarReporte(Context ctx) {
         try {
             Integer idReporte = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Usar el ObjectMapper configurado para leer el JSON
             CerrarReporteRequest request = objectMapper.readValue(ctx.body(), CerrarReporteRequest.class);
-            
+
             ReporteInquilino reporte = reporteInquilinoService.cerrarReporte(
-                idReporte, 
-                request.fechaCierre, 
-                request.accionesTomadas, 
-                request.estadoFinal
+                    idReporte,
+                    request.fechaCierre,
+                    request.accionesTomadas,
+                    request.estadoFinal
             );
             ctx.json(createSafeResponse(reporte));
         } catch (NumberFormatException e) {
@@ -436,7 +437,7 @@ public class ReporteInquilinoController {
     public void actualizarEstadoReporte(Context ctx) {
         try {
             Integer idReporte = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Usar el ObjectMapper configurado para leer el JSON
             ActualizarEstadoRequest request = objectMapper.readValue(ctx.body(), ActualizarEstadoRequest.class);
 
@@ -457,7 +458,7 @@ public class ReporteInquilinoController {
     public void actualizarAccionesTomadas(Context ctx) {
         try {
             Integer idReporte = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Usar el ObjectMapper configurado para leer el JSON
             ActualizarAccionesRequest request = objectMapper.readValue(ctx.body(), ActualizarAccionesRequest.class);
 
@@ -639,7 +640,7 @@ public class ReporteInquilinoController {
             this.estadoReporte = reporte.getEstadoReporte();
             this.fechaCierre = reporte.getFechaCierre();
             this.accionesTomadas = reporte.getAccionesTomadas();
-            
+
             // Manejar relaciones de forma segura
             if (reporte.getInquilino() != null) {
                 this.nombreInquilino = reporte.getInquilino().getNombreInquilino();

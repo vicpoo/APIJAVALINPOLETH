@@ -5,6 +5,7 @@ import com.poleth.api.model.Inquilino;
 import com.poleth.api.repository.InquilinoRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class InquilinoService {
     private final InquilinoRepository inquilinoRepository;
@@ -186,16 +187,16 @@ public class InquilinoService {
         return inquilinoRepository.findByMultipleCriteria(nombre, email, telefono);
     }
 
-    // Método para buscar inquilinos por término general
+    // Método para buscar inquilinos por término general - CORREGIDO
     public List<Inquilino> searchInquilinos(String termino) {
         List<Inquilino> todosInquilinos = inquilinoRepository.findAll();
-        
+
         return todosInquilinos.stream()
                 .filter(i -> i.getNombreInquilino().toLowerCase().contains(termino.toLowerCase()) ||
-                            (i.getEmail() != null && i.getEmail().toLowerCase().contains(termino.toLowerCase())) ||
-                            (i.getTelefonoInquilino() != null && i.getTelefonoInquilino().contains(termino)) ||
-                            (i.getIne() != null && i.getIne().toLowerCase().contains(termino.toLowerCase())))
-                .toList();
+                        (i.getEmail() != null && i.getEmail().toLowerCase().contains(termino.toLowerCase())) ||
+                        (i.getTelefonoInquilino() != null && i.getTelefonoInquilino().contains(termino)) ||
+                        (i.getIne() != null && i.getIne().toLowerCase().contains(termino.toLowerCase())))
+                .collect(Collectors.toList());
     }
 
     // Método de validación básica de formato de email
@@ -214,7 +215,7 @@ public class InquilinoService {
         Long inquilinosConTelefono = todosInquilinos.stream()
                 .filter(i -> i.getTelefonoInquilino() != null && !i.getTelefonoInquilino().trim().isEmpty())
                 .count();
-        
+
         return new InquilinoStats(totalInquilinos, inquilinosConTelefono);
     }
 

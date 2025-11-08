@@ -7,6 +7,8 @@ import com.poleth.api.repository.HistorialReporteRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.Collections;
 
 public class HistorialReporteService {
     private final HistorialReporteRepository historialReporteRepository;
@@ -216,38 +218,38 @@ public class HistorialReporteService {
 
     // Método para registrar cambio de estado en historial
     public HistorialReporte registrarCambioEstado(ReporteInquilino reporte, String estadoAnterior, String estadoNuevo, String usuarioRegistro) {
-        String descripcion = String.format("Cambio de estado: %s → %s. Reporte: %s", 
-            estadoAnterior, 
-            estadoNuevo,
-            reporte.getDescripcion() != null ? reporte.getDescripcion() : "Sin descripción"
+        String descripcion = String.format("Cambio de estado: %s → %s. Reporte: %s",
+                estadoAnterior,
+                estadoNuevo,
+                reporte.getDescripcion() != null ? reporte.getDescripcion() : "Sin descripción"
         );
-        
+
         HistorialReporte historial = new HistorialReporte(
-            reporte.getIdReporte(),
-            reporte.getNombre(),
-            reporte.getTipo(),
-            descripcion,
-            usuarioRegistro
+                reporte.getIdReporte(),
+                reporte.getNombre(),
+                reporte.getTipo(),
+                descripcion,
+                usuarioRegistro
         );
-        
+
         return historialReporteRepository.save(historial);
     }
 
     // Método para registrar cierre de reporte en historial
     public HistorialReporte registrarCierreReporte(ReporteInquilino reporte, String accionesTomadas, String usuarioRegistro) {
-        String descripcion = String.format("Reporte cerrado. Acciones tomadas: %s. Reporte original: %s", 
-            accionesTomadas,
-            reporte.getDescripcion() != null ? reporte.getDescripcion() : "Sin descripción"
+        String descripcion = String.format("Reporte cerrado. Acciones tomadas: %s. Reporte original: %s",
+                accionesTomadas,
+                reporte.getDescripcion() != null ? reporte.getDescripcion() : "Sin descripción"
         );
-        
+
         HistorialReporte historial = new HistorialReporte(
-            reporte.getIdReporte(),
-            reporte.getNombre(),
-            reporte.getTipo(),
-            descripcion,
-            usuarioRegistro
+                reporte.getIdReporte(),
+                reporte.getNombre(),
+                reporte.getTipo(),
+                descripcion,
+                usuarioRegistro
         );
-        
+
         return historialReporteRepository.save(historial);
     }
 
@@ -256,11 +258,11 @@ public class HistorialReporteService {
         List<HistorialReporte> todosHistoriales = historialReporteRepository.findAll();
         int inicio = Math.max(0, (pagina - 1) * tamaño);
         int fin = Math.min(todosHistoriales.size(), inicio + tamaño);
-        
+
         if (inicio >= todosHistoriales.size()) {
-            return List.of();
+            return Collections.emptyList();
         }
-        
+
         return todosHistoriales.subList(inicio, fin);
     }
 
@@ -269,11 +271,11 @@ public class HistorialReporteService {
         List<HistorialReporte> historialesReporte = historialReporteRepository.findByIdReporte(idReporte);
         int inicio = Math.max(0, (pagina - 1) * tamaño);
         int fin = Math.min(historialesReporte.size(), inicio + tamaño);
-        
+
         if (inicio >= historialesReporte.size()) {
-            return List.of();
+            return Collections.emptyList();
         }
-        
+
         return historialesReporte.subList(inicio, fin);
     }
 
@@ -282,11 +284,11 @@ public class HistorialReporteService {
         List<HistorialReporte> historialesRecientes = historialReporteRepository.findRecientes(dias);
         int inicio = Math.max(0, (pagina - 1) * tamaño);
         int fin = Math.min(historialesRecientes.size(), inicio + tamaño);
-        
+
         if (inicio >= historialesRecientes.size()) {
-            return List.of();
+            return Collections.emptyList();
         }
-        
+
         return historialesRecientes.subList(inicio, fin);
     }
 
@@ -295,13 +297,13 @@ public class HistorialReporteService {
         return historialReporteRepository.findByIdReporteOrderByFechaDesc(idReporte);
     }
 
-    // Método para obtener actividad reciente de un usuario
+    // Método para obtener actividad reciente de un usuario - CORREGIDO
     public List<HistorialReporte> getActividadRecienteUsuario(String usuarioRegistro, int limite) {
         List<HistorialReporte> historiales = historialReporteRepository.findByUsuarioRegistro(usuarioRegistro);
         return historiales.stream()
                 .sorted((h1, h2) -> h2.getFechaRegistro().compareTo(h1.getFechaRegistro()))
                 .limit(limite)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     // Método para obtener estadísticas de actividad
@@ -309,17 +311,17 @@ public class HistorialReporteService {
         Long total = historialReporteRepository.count();
         List<Object[]> estadisticasUsuario = historialReporteRepository.getEstadisticasPorUsuario();
         List<Object[]> estadisticasFecha = historialReporteRepository.getEstadisticasPorFecha();
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("Total de registros históricos: %d\n", total));
         sb.append("Actividad por usuario:\n");
-        
+
         for (Object[] stats : estadisticasUsuario) {
             String usuario = (String) stats[0];
             Long count = (Long) stats[1];
             sb.append(String.format("  %s: %d registros\n", usuario, count));
         }
-        
+
         sb.append("Actividad reciente por fecha:\n");
         int count = 0;
         for (Object[] stats : estadisticasFecha) {
@@ -329,7 +331,7 @@ public class HistorialReporteService {
             sb.append(String.format("  %s: %d registros\n", fecha.toString(), registros));
             count++;
         }
-        
+
         return sb.toString();
     }
 
@@ -337,16 +339,16 @@ public class HistorialReporteService {
     public int limpiarHistorialesAntiguos(int dias) {
         LocalDateTime fechaLimite = LocalDateTime.now().minusDays(dias);
         List<HistorialReporte> historialesAntiguos = historialReporteRepository.findByFechaRegistroBetween(
-            LocalDateTime.of(1970, 1, 1, 0, 0), // Fecha muy antigua
-            fechaLimite
+                LocalDateTime.of(1970, 1, 1, 0, 0), // Fecha muy antigua
+                fechaLimite
         );
-        
+
         int eliminados = 0;
         for (HistorialReporte historial : historialesAntiguos) {
             historialReporteRepository.delete(historial.getIdHistorial());
             eliminados++;
         }
-        
+
         return eliminados;
     }
 
@@ -356,7 +358,7 @@ public class HistorialReporteService {
         if (ultimoHistorial.isEmpty()) {
             return false;
         }
-        
+
         LocalDateTime fechaLimite = LocalDateTime.now().minusHours(horas);
         return ultimoHistorial.get().getFechaRegistro().isAfter(fechaLimite);
     }

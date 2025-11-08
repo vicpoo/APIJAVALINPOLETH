@@ -15,6 +15,7 @@ import io.javalin.http.HttpStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class HistorialReporteController {
     private final HistorialReporteService historialReporteService;
@@ -57,7 +58,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historialesReportes = historialReporteService.getAllHistorialReportes();
             List<HistorialReporteResponse> safeResponses = historialesReportes.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -107,13 +108,13 @@ public class HistorialReporteController {
     public void deleteHistorialReporte(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
+
             if (!historialReporteService.existsById(id)) {
                 ctx.status(HttpStatus.NOT_FOUND)
                         .json("Historial no encontrado con ID: " + id);
                 return;
             }
-            
+
             historialReporteService.deleteHistorialReporte(id);
             ctx.status(HttpStatus.NO_CONTENT);
         } catch (NumberFormatException e) {
@@ -133,7 +134,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesByReporte(idReporte);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -156,7 +157,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesByTipo(tipo);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -176,7 +177,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesByUsuario(usuario);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -209,7 +210,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getAllHistorialesOrderByFechaDesc();
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -223,7 +224,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesByReporteOrderByFechaDesc(idReporte);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -241,7 +242,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesRecientes(dias);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -264,7 +265,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesByDescripcionContaining(texto);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -284,7 +285,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesByNombreContaining(texto);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -297,7 +298,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesWithRelations();
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -331,7 +332,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getHistorialesByReporteWithRelations(idReporte);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -348,7 +349,7 @@ public class HistorialReporteController {
         try {
             Integer idReporte = Integer.parseInt(ctx.pathParam("idReporte"));
             String body = ctx.body();
-            
+
             String usuarioRegistro = objectMapper.readTree(body).get("usuarioRegistro").asText();
 
             Optional<ReporteInquilino> reporteOpt = reporteInquilinoService.getReporteInquilinoById(idReporte);
@@ -374,7 +375,7 @@ public class HistorialReporteController {
         try {
             Integer idReporte = Integer.parseInt(ctx.pathParam("idReporte"));
             String body = ctx.body();
-            
+
             String accion = objectMapper.readTree(body).get("accion").asText();
             String usuarioRegistro = objectMapper.readTree(body).get("usuarioRegistro").asText();
 
@@ -401,7 +402,7 @@ public class HistorialReporteController {
         try {
             Integer idReporte = Integer.parseInt(ctx.pathParam("idReporte"));
             String body = ctx.body();
-            
+
             String estadoAnterior = objectMapper.readTree(body).get("estadoAnterior").asText();
             String estadoNuevo = objectMapper.readTree(body).get("estadoNuevo").asText();
             String usuarioRegistro = objectMapper.readTree(body).get("usuarioRegistro").asText();
@@ -429,7 +430,7 @@ public class HistorialReporteController {
         try {
             Integer idReporte = Integer.parseInt(ctx.pathParam("idReporte"));
             String body = ctx.body();
-            
+
             String accionesTomadas = objectMapper.readTree(body).get("accionesTomadas").asText();
             String usuarioRegistro = objectMapper.readTree(body).get("usuarioRegistro").asText();
 
@@ -533,7 +534,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getLineaTiempoReporte(idReporte);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -558,7 +559,7 @@ public class HistorialReporteController {
             List<HistorialReporte> historiales = historialReporteService.getActividadRecienteUsuario(usuario, limite);
             List<HistorialReporteResponse> safeResponses = historiales.stream()
                     .map(this::createSafeResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             ctx.json(safeResponses);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
@@ -619,7 +620,7 @@ public class HistorialReporteController {
             this.descripcionHist = historial.getDescripcionHist();
             this.fechaRegistro = historial.getFechaRegistro();
             this.usuarioRegistro = historial.getUsuarioRegistro();
-            
+
             // Manejar relaciones de forma segura
             if (historial.getReporte() != null) {
                 this.nombreReporteOriginal = historial.getReporte().getNombre();
