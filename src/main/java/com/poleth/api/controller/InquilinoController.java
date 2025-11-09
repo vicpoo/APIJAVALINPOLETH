@@ -139,30 +139,6 @@ public class InquilinoController {
         }
     }
 
-    // Búsqueda avanzada por múltiples criterios
-    public void searchInquilinos(Context ctx) {
-        try {
-            String nombre = ctx.queryParam("nombre");
-            String email = ctx.queryParam("email");
-            String telefono = ctx.queryParam("telefono");
-
-            // Si solo hay un término de búsqueda general
-            String terminoGeneral = ctx.queryParam("q");
-            if (terminoGeneral != null && !terminoGeneral.trim().isEmpty()) {
-                List<Inquilino> inquilinos = inquilinoService.searchInquilinos(terminoGeneral);
-                ctx.json(inquilinos);
-                return;
-            }
-
-            // Búsqueda por criterios específicos
-            List<Inquilino> inquilinos = inquilinoService.searchInquilinos(nombre, email, telefono);
-            ctx.json(inquilinos);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error en la búsqueda: " + e.getMessage());
-        }
-    }
-
     // Actualizar inquilino
     public void updateInquilino(Context ctx) {
         try {
@@ -187,7 +163,7 @@ public class InquilinoController {
     public void deleteInquilino(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Verificar si el inquilino existe antes de eliminarlo
             Optional<Inquilino> inquilino = inquilinoService.getInquilinoById(id);
             if (inquilino.isEmpty()) {
@@ -243,25 +219,14 @@ public class InquilinoController {
         }
     }
 
-    // Obtener estadísticas de inquilinos
-    public void getStats(Context ctx) {
-        try {
-            InquilinoService.InquilinoStats stats = inquilinoService.getStats();
-            ctx.json(stats);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener estadísticas: " + e.getMessage());
-        }
-    }
-
-    // Clases internas para respuestas JSON
+    // Clase interna para respuesta JSON
     private static class ExistsResponse {
         private final boolean exists;
-        
+
         public ExistsResponse(boolean exists) {
             this.exists = exists;
         }
-        
+
         public boolean isExists() {
             return exists;
         }

@@ -173,39 +173,4 @@ public class InquilinoRepository {
             em.close();
         }
     }
-
-
-    // Método para buscar inquilinos por múltiples criterios
-    public List<Inquilino> findByMultipleCriteria(String nombre, String email, String telefono) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            StringBuilder query = new StringBuilder("SELECT i FROM Inquilino i WHERE 1=1");
-            
-            if (nombre != null && !nombre.trim().isEmpty()) {
-                query.append(" AND i.nombreInquilino LIKE :nombre");
-            }
-            if (email != null && !email.trim().isEmpty()) {
-                query.append(" AND i.email LIKE :email");
-            }
-            if (telefono != null && !telefono.trim().isEmpty()) {
-                query.append(" AND i.telefonoInquilino LIKE :telefono");
-            }
-
-            var typedQuery = em.createQuery(query.toString(), Inquilino.class);
-            
-            if (nombre != null && !nombre.trim().isEmpty()) {
-                typedQuery.setParameter("nombre", "%" + nombre + "%");
-            }
-            if (email != null && !email.trim().isEmpty()) {
-                typedQuery.setParameter("email", "%" + email + "%");
-            }
-            if (telefono != null && !telefono.trim().isEmpty()) {
-                typedQuery.setParameter("telefono", "%" + telefono + "%");
-            }
-
-            return typedQuery.getResultList();
-        } finally {
-            em.close();
-        }
-    }
 }

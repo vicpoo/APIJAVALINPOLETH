@@ -5,7 +5,6 @@ import com.poleth.api.model.Inquilino;
 import com.poleth.api.repository.InquilinoRepository;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class InquilinoService {
     private final InquilinoRepository inquilinoRepository;
@@ -177,28 +176,6 @@ public class InquilinoService {
         return inquilinoRepository.save(inquilinoExistente);
     }
 
-    // Método para verificar si un inquilino existe por ID
-    public boolean existsById(Integer id) {
-        return inquilinoRepository.findById(id).isPresent();
-    }
-
-    // Método para buscar inquilinos por múltiples criterios
-    public List<Inquilino> searchInquilinos(String nombre, String email, String telefono) {
-        return inquilinoRepository.findByMultipleCriteria(nombre, email, telefono);
-    }
-
-    // Método para buscar inquilinos por término general - CORREGIDO
-    public List<Inquilino> searchInquilinos(String termino) {
-        List<Inquilino> todosInquilinos = inquilinoRepository.findAll();
-
-        return todosInquilinos.stream()
-                .filter(i -> i.getNombreInquilino().toLowerCase().contains(termino.toLowerCase()) ||
-                        (i.getEmail() != null && i.getEmail().toLowerCase().contains(termino.toLowerCase())) ||
-                        (i.getTelefonoInquilino() != null && i.getTelefonoInquilino().contains(termino)) ||
-                        (i.getIne() != null && i.getIne().toLowerCase().contains(termino.toLowerCase())))
-                .collect(Collectors.toList());
-    }
-
     // Método de validación básica de formato de email
     private boolean isValidEmailFormat(String email) {
         if (email == null || email.trim().isEmpty()) {
@@ -206,39 +183,5 @@ public class InquilinoService {
         }
         // Validación básica de formato de email
         return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
-    }
-
-    // Método para obtener estadísticas básicas
-    public InquilinoStats getStats() {
-        List<Inquilino> todosInquilinos = inquilinoRepository.findAll();
-        Long totalInquilinos = (long) todosInquilinos.size();
-        Long inquilinosConTelefono = todosInquilinos.stream()
-                .filter(i -> i.getTelefonoInquilino() != null && !i.getTelefonoInquilino().trim().isEmpty())
-                .count();
-
-        return new InquilinoStats(totalInquilinos, inquilinosConTelefono);
-    }
-
-    // Clase interna para estadísticas
-    public static class InquilinoStats {
-        private final Long totalInquilinos;
-        private final Long inquilinosConTelefono;
-
-        public InquilinoStats(Long totalInquilinos, Long inquilinosConTelefono) {
-            this.totalInquilinos = totalInquilinos;
-            this.inquilinosConTelefono = inquilinosConTelefono;
-        }
-
-        public Long getTotalInquilinos() {
-            return totalInquilinos;
-        }
-
-        public Long getInquilinosConTelefono() {
-            return inquilinosConTelefono;
-        }
-
-        public Long getInquilinosSinTelefono() {
-            return totalInquilinos - inquilinosConTelefono;
-        }
     }
 }

@@ -24,14 +24,10 @@ public class InquilinoRoutes {
         app.get("/api/inquilinos/ine/{ine}", inquilinoController::getInquilinoByIne);
         app.get("/api/inquilinos/buscar/nombre", inquilinoController::getInquilinosByNombre);
         app.get("/api/inquilinos/buscar/telefono", inquilinoController::getInquilinosByTelefono);
-        app.get("/api/inquilinos/buscar", inquilinoController::searchInquilinos);
 
         // Rutas de verificación
         app.get("/api/inquilinos/exists/email/{email}", inquilinoController::existsByEmail);
         app.get("/api/inquilinos/exists/ine/{ine}", inquilinoController::existsByIne);
         app.get("/api/inquilinos/exists/nombre/{nombre}", inquilinoController::existsByNombre);
-
-        // Rutas de utilidad
-        app.get("/api/inquilinos/stats", inquilinoController::getStats);
     }
 }
