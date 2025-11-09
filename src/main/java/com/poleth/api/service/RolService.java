@@ -38,11 +38,6 @@ public class RolService {
         return rolRepository.existsByNombreRol(nombreRol);
     }
 
-    // Método para contar todos los roles
-    public Long countRoles() {
-        return rolRepository.count();
-    }
-
     // Método para crear un nuevo rol con validaciones
     public Rol createRol(Rol rol) {
         // Validaciones básicas
@@ -95,23 +90,5 @@ public class RolService {
 
         // Guardar los cambios
         return rolRepository.save(rolExistente);
-    }
-
-    // Método para verificar si un rol existe por ID
-    public boolean existsById(Integer id) {
-        return rolRepository.findById(id).isPresent();
-    }
-
-    // Método para obtener roles con paginación (simplificado)
-    public List<Rol> getRolesPaginados(int pagina, int tamaño) {
-        List<Rol> todosRoles = rolRepository.findAll();
-        int inicio = Math.max(0, (pagina - 1) * tamaño);
-        int fin = Math.min(todosRoles.size(), inicio + tamaño);
-        
-        if (inicio >= todosRoles.size()) {
-            return List.of();
-        }
-        
-        return todosRoles.subList(inicio, fin);
     }
 }

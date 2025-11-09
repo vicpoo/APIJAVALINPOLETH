@@ -103,15 +103,4 @@ public class RolRepository {
             em.close();
         }
     }
-
-    // Método adicional: contar todos los roles
-    public Long count() {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            return em.createQuery("SELECT COUNT(r) FROM Rol r", Long.class)
-                    .getSingleResult();
-        } finally {
-            em.close();
-        }
-    }
 }

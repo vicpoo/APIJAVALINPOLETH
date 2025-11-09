@@ -119,7 +119,7 @@ public class RolController {
     public void deleteRol(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Verificar si el rol existe antes de eliminarlo
             Optional<Rol> rol = rolService.getRolById(id);
             if (rol.isEmpty()) {
@@ -139,18 +139,6 @@ public class RolController {
         }
     }
 
-    // Contar roles
-    public void countRoles(Context ctx) {
-        try {
-            Long count = rolService.countRoles();
-            ctx.json(new CountResponse(count));
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al contar los roles: " + e.getMessage());
-        }
-    }
-
-
     // Verificar si existe rol por nombre
     public void existsByNombre(Context ctx) {
         try {
@@ -163,26 +151,14 @@ public class RolController {
         }
     }
 
-    // Clases internas para respuestas JSON
-    private static class CountResponse {
-        private final Long count;
-        
-        public CountResponse(Long count) {
-            this.count = count;
-        }
-        
-        public Long getCount() {
-            return count;
-        }
-    }
-
+    // Clase interna para respuesta JSON
     private static class ExistsResponse {
         private final boolean exists;
-        
+
         public ExistsResponse(boolean exists) {
             this.exists = exists;
         }
-        
+
         public boolean isExists() {
             return exists;
         }
