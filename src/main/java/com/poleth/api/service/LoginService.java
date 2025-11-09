@@ -10,6 +10,7 @@ import com.poleth.api.repository.RolRepository;
 import com.poleth.api.repository.PropietarioRepository;
 import com.poleth.api.repository.InquilinoRepository;
 import com.poleth.api.util.JWTUtil;
+import com.poleth.api.util.PasswordUtil;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,15 +34,24 @@ public class LoginService {
     }
 
     public List<Login> getAllLogins() {
-        return loginRepository.findAll();
+        List<Login> logins = loginRepository.findAll();
+        // Por seguridad, no devolvemos las contraseñas
+        logins.forEach(login -> login.setContrasena(null));
+        return logins;
     }
 
     public Optional<Login> getLoginById(Integer id) {
-        return loginRepository.findById(id);
+        Optional<Login> login = loginRepository.findById(id);
+        // Por seguridad, no devolvemos la contraseña
+        login.ifPresent(l -> l.setContrasena(null));
+        return login;
     }
 
     public Optional<Login> getLoginByUsuario(String usuario) {
-        return loginRepository.findByUsuario(usuario);
+        Optional<Login> login = loginRepository.findByUsuario(usuario);
+        // Por seguridad, no devolvemos la contraseña
+        login.ifPresent(l -> l.setContrasena(null));
+        return login;
     }
 
     public void deleteLogin(Integer id) {
@@ -76,6 +86,11 @@ public class LoginService {
             throw new IllegalArgumentException("La contraseña no puede exceder 255 caracteres");
         }
 
+        // Validar fortaleza de contraseña (opcional pero recomendado)
+        if (!esContrasenaSegura(login.getContrasena())) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas y números");
+        }
+
         // Verificar si el usuario ya existe
         if (existsByUsuario(login.getUsuario())) {
             throw new IllegalArgumentException("El usuario '" + login.getUsuario() + "' ya está registrado");
@@ -88,8 +103,16 @@ public class LoginService {
         }
         login.setRol(rolExistente.get());
 
+        // ENCRIPTAR CONTRASEÑA antes de guardar
+        String hashedPassword = PasswordUtil.hashPassword(login.getContrasena());
+        login.setContrasena(hashedPassword);
+
         // Guardar el login
-        return loginRepository.save(login);
+        Login savedLogin = loginRepository.save(login);
+
+        // Por seguridad, no devolvemos la contraseña
+        savedLogin.setContrasena(null);
+        return savedLogin;
     }
 
     // Método para actualizar un login existente
@@ -136,13 +159,20 @@ public class LoginService {
             throw new IllegalArgumentException("El rol especificado no existe");
         }
 
+        // ENCRIPTAR NUEVA CONTRASEÑA
+        String hashedPassword = PasswordUtil.hashPassword(loginActualizado.getContrasena());
+
         // Actualizar los campos
         loginExistente.setUsuario(loginActualizado.getUsuario());
-        loginExistente.setContrasena(loginActualizado.getContrasena());
+        loginExistente.setContrasena(hashedPassword);
         loginExistente.setRol(rolExistente.get());
 
         // Guardar los cambios
-        return loginRepository.save(loginExistente);
+        Login updatedLogin = loginRepository.save(loginExistente);
+
+        // Por seguridad, no devolvemos la contraseña
+        updatedLogin.setContrasena(null);
+        return updatedLogin;
     }
 
     // Método para autenticar usuario y generar JWT
@@ -155,14 +185,24 @@ public class LoginService {
             throw new IllegalArgumentException("La contraseña es requerida");
         }
 
-        Optional<Login> login = loginRepository.autenticar(usuario, contrasena);
+        // Buscar usuario por nombre de usuario
+        Optional<Login> loginOpt = loginRepository.findByUsuario(usuario);
 
-        if (login.isPresent()) {
-            String token = JWTUtil.generarToken(login.get());
-            return new AuthResponse(token, login.get());
-        } else {
-            throw new IllegalArgumentException("Credenciales inválidas");
+        if (loginOpt.isPresent()) {
+            Login login = loginOpt.get();
+
+            // VERIFICAR CONTRASEÑA CON HASH
+            if (PasswordUtil.checkPassword(contrasena, login.getContrasena())) {
+                String token = JWTUtil.generarToken(login);
+
+                // No devolvemos la contraseña por seguridad
+                login.setContrasena(null);
+
+                return new AuthResponse(token, login);
+            }
         }
+
+        throw new IllegalArgumentException("Credenciales inválidas");
     }
 
     // Método para cambiar contraseña
@@ -175,33 +215,70 @@ public class LoginService {
             throw new IllegalArgumentException("La contraseña no puede exceder 255 caracteres");
         }
 
+        // Validar fortaleza de contraseña
+        if (!esContrasenaSegura(nuevaContrasena)) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas y números");
+        }
+
         // Verificar que el login exista
         Optional<Login> login = loginRepository.findById(idLogin);
         if (login.isEmpty()) {
             throw new IllegalArgumentException("Login no encontrado con ID: " + idLogin);
         }
 
-        return loginRepository.actualizarContrasena(idLogin, nuevaContrasena);
+        // ENCRIPTAR NUEVA CONTRASEÑA
+        String hashedPassword = PasswordUtil.hashPassword(nuevaContrasena);
+
+        return loginRepository.actualizarContrasena(idLogin, hashedPassword);
     }
 
     // Método para buscar logins por rol
     public List<Login> getLoginsByRol(Integer idRol) {
-        return loginRepository.findByRol(idRol);
+        List<Login> logins = loginRepository.findByRol(idRol);
+        // Por seguridad, no devolvemos las contraseñas
+        logins.forEach(login -> login.setContrasena(null));
+        return logins;
     }
 
     // Método para obtener login por propietario
     public Optional<Login> getLoginByPropietario(Integer idPropietario) {
-        return loginRepository.findByPropietario(idPropietario);
+        Optional<Login> login = loginRepository.findByPropietario(idPropietario);
+        // Por seguridad, no devolvemos la contraseña
+        login.ifPresent(l -> l.setContrasena(null));
+        return login;
     }
 
     // Método para obtener login por inquilino
     public Optional<Login> getLoginByInquilino(Integer idInquilino) {
-        return loginRepository.findByInquilino(idInquilino);
+        Optional<Login> login = loginRepository.findByInquilino(idInquilino);
+        // Por seguridad, no devolvemos la contraseña
+        login.ifPresent(l -> l.setContrasena(null));
+        return login;
     }
 
     // Método para verificar si un login existe por ID
     public boolean existsById(Integer id) {
         return loginRepository.findById(id).isPresent();
+    }
+
+    // Método auxiliar para validar fortaleza de contraseña
+    private boolean esContrasenaSegura(String contrasena) {
+        if (contrasena == null || contrasena.length() < 8) {
+            return false;
+        }
+
+        // Verificar que tenga al menos una mayúscula, una minúscula y un número
+        boolean tieneMayuscula = false;
+        boolean tieneMinuscula = false;
+        boolean tieneNumero = false;
+
+        for (char c : contrasena.toCharArray()) {
+            if (Character.isUpperCase(c)) tieneMayuscula = true;
+            if (Character.isLowerCase(c)) tieneMinuscula = true;
+            if (Character.isDigit(c)) tieneNumero = true;
+        }
+
+        return tieneMayuscula && tieneMinuscula && tieneNumero;
     }
 
     // Clase para respuesta de autenticación

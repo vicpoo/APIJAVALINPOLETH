@@ -27,11 +27,11 @@
             <version>6.1.3</version>
         </dependency>
 
-        <!-- Jetty (embebido, usado por Javalin) -->
+        <!-- BCrypt para encriptación de contraseñas -->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>11.0.17</version>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
         </dependency>
 
         <!-- Jackson (JSON) -->

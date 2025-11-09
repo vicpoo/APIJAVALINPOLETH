@@ -149,22 +149,7 @@ public class LoginRepository {
         }
     }
 
-    // Método para autenticar usuario
-    public Optional<Login> autenticar(String usuario, String contrasena) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            return em.createQuery(
-                            "SELECT l FROM Login l WHERE l.usuario = :usuario AND l.contrasena = :contrasena", Login.class)
-                    .setParameter("usuario", usuario)
-                    .setParameter("contrasena", contrasena)
-                    .getResultStream()
-                    .findFirst();
-        } catch (NoResultException e) {
-            return Optional.empty();
-        } finally {
-            em.close();
-        }
-    }
+    // MÉTODO ELIMINADO: autenticar() ya no se usa aquí, la lógica está en el servicio
 
     // Método para actualizar contraseña
     public boolean actualizarContrasena(Integer idLogin, String nuevaContrasena) {
