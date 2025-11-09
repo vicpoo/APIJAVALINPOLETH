@@ -22,10 +22,8 @@ public class PropietarioRoutes {
         // Rutas de búsqueda específicas
         app.get("/api/propietarios/gmail/{gmail}", propietarioController::getPropietarioByGmail);
         app.get("/api/propietarios/buscar/nombre", propietarioController::getPropietariosByNombre);
-        app.get("/api/propietarios/buscar", propietarioController::searchPropietarios);
 
-        // Rutas de verificación y utilidad
-        app.get("/api/propietarios/count", propietarioController::countPropietarios);
+        // Rutas de verificación
         app.get("/api/propietarios/exists/gmail/{gmail}", propietarioController::existsByGmail);
         app.get("/api/propietarios/exists/nombre/{nombre}", propietarioController::existsByNombre);
     }

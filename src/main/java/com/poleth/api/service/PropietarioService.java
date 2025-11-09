@@ -5,7 +5,6 @@ import com.poleth.api.model.Propietario;
 import com.poleth.api.repository.PropietarioRepository;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class PropietarioService {
     private final PropietarioRepository propietarioRepository;
@@ -45,11 +44,6 @@ public class PropietarioService {
 
     public boolean existsByNombre(String nombre) {
         return propietarioRepository.existsByNombre(nombre);
-    }
-
-    // Método para contar todos los propietarios
-    public Long countPropietarios() {
-        return propietarioRepository.count();
     }
 
     // Método para crear un nuevo propietario con validaciones
@@ -129,21 +123,6 @@ public class PropietarioService {
 
         // Guardar los cambios
         return propietarioRepository.save(propietarioExistente);
-    }
-
-    // Método para verificar si un propietario existe por ID
-    public boolean existsById(Integer id) {
-        return propietarioRepository.findById(id).isPresent();
-    }
-
-    // Método para buscar propietarios por término (nombre o gmail) - CORREGIDO
-    public List<Propietario> searchPropietarios(String termino) {
-        List<Propietario> todosPropietarios = propietarioRepository.findAll();
-
-        return todosPropietarios.stream()
-                .filter(p -> p.getNombre().toLowerCase().contains(termino.toLowerCase()) ||
-                        (p.getGmail() != null && p.getGmail().toLowerCase().contains(termino.toLowerCase())))
-                .collect(Collectors.toList());
     }
 
     // Método de validación básica de formato de email

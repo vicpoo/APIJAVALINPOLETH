@@ -103,24 +103,6 @@ public class PropietarioController {
         }
     }
 
-    // Buscar propietarios por término (nombre o gmail)
-    public void searchPropietarios(Context ctx) {
-        try {
-            String termino = ctx.queryParam("q");
-            if (termino == null || termino.trim().isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El parámetro de búsqueda 'q' es requerido");
-                return;
-            }
-
-            List<Propietario> propietarios = propietarioService.searchPropietarios(termino);
-            ctx.json(propietarios);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error en la búsqueda: " + e.getMessage());
-        }
-    }
-
     // Actualizar propietario
     public void updatePropietario(Context ctx) {
         try {
@@ -145,7 +127,7 @@ public class PropietarioController {
     public void deletePropietario(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Verificar si el propietario existe antes de eliminarlo
             Optional<Propietario> propietario = propietarioService.getPropietarioById(id);
             if (propietario.isEmpty()) {
@@ -162,17 +144,6 @@ public class PropietarioController {
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .json("Error al eliminar el propietario: " + e.getMessage());
-        }
-    }
-
-    // Contar propietarios
-    public void countPropietarios(Context ctx) {
-        try {
-            Long count = propietarioService.countPropietarios();
-            ctx.json(new CountResponse(count));
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al contar los propietarios: " + e.getMessage());
         }
     }
 
@@ -199,27 +170,15 @@ public class PropietarioController {
                     .json("Error al verificar el propietario: " + e.getMessage());
         }
     }
-    
-    // Clases internas para respuestas JSON
-    private static class CountResponse {
-        private final Long count;
-        
-        public CountResponse(Long count) {
-            this.count = count;
-        }
-        
-        public Long getCount() {
-            return count;
-        }
-    }
 
+    // Clase interna para respuesta JSON
     private static class ExistsResponse {
         private final boolean exists;
-        
+
         public ExistsResponse(boolean exists) {
             this.exists = exists;
         }
-        
+
         public boolean isExists() {
             return exists;
         }

@@ -130,16 +130,4 @@ public class PropietarioRepository {
             em.close();
         }
     }
-
-    // Método adicional: contar todos los propietarios
-    public Long count() {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            return em.createQuery("SELECT COUNT(p) FROM Propietario p", Long.class)
-                    .getSingleResult();
-        } finally {
-            em.close();
-        }
-    }
-
 }
