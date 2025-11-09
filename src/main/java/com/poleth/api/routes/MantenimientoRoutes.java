@@ -19,27 +19,8 @@ public class MantenimientoRoutes {
         app.put("/api/mantenimientos/{id}", mantenimientoController::updateMantenimiento);
         app.delete("/api/mantenimientos/{id}", mantenimientoController::deleteMantenimiento);
 
-        // Rutas de búsqueda y consultas específicas
-        app.get("/api/mantenimientos/cuarto/{idCuarto}", mantenimientoController::getMantenimientosByCuarto);
-        app.get("/api/mantenimientos/estado", mantenimientoController::getMantenimientosByEstado);
-        app.get("/api/mantenimientos/pendientes", mantenimientoController::getMantenimientosPendientes);
-        app.get("/api/mantenimientos/completados", mantenimientoController::getMantenimientosCompletados);
-        app.get("/api/mantenimientos/cuarto/{idCuarto}/pendientes", mantenimientoController::getMantenimientosPendientesByCuarto);
-        app.get("/api/mantenimientos/buscar/descripcion", mantenimientoController::getMantenimientosByDescripcion);
-        app.get("/api/mantenimientos/recientes", mantenimientoController::getMantenimientosRecientes);
-
-
-        // Rutas de gestión
+        // Rutas de gestión específicas
         app.patch("/api/mantenimientos/{id}/atender", mantenimientoController::atenderMantenimiento);
         app.patch("/api/mantenimientos/{id}/estado", mantenimientoController::actualizarEstadoMantenimiento);
-        app.patch("/api/mantenimientos/{id}/costo", mantenimientoController::actualizarCostoMantenimiento);
-
-        // Rutas de verificación
-        app.get("/api/mantenimientos/cuarto/{idCuarto}/pendientes/exists", mantenimientoController::existsPendientesByCuarto);
-
-        // Rutas de conteo
-        app.get("/api/mantenimientos/count", mantenimientoController::countMantenimientos);
-        app.get("/api/mantenimientos/pendientes/count", mantenimientoController::countMantenimientosPendientes);
-        app.get("/api/mantenimientos/completados/count", mantenimientoController::countMantenimientosCompletados);
     }
 }
