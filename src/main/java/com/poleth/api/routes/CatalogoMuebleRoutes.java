@@ -19,22 +19,12 @@ public class CatalogoMuebleRoutes {
         app.put("/api/catalogo-muebles/{id}", catalogoMuebleController::updateCatalogoMueble);
         app.delete("/api/catalogo-muebles/{id}", catalogoMuebleController::deleteCatalogoMueble);
 
-        // Rutas de búsqueda y consultas específicas
-        app.get("/api/catalogo-muebles/buscar/nombre", catalogoMuebleController::getCatalogoMuebleByNombre);
-        app.get("/api/catalogo-muebles/buscar/nombre-contiene", catalogoMuebleController::getCatalogoMueblesByNombreContaining);
+        // Rutas de búsqueda específicas
+        app.get("/api/catalogomuebles/buscar/nombre", catalogoMuebleController::getCatalogoMuebleByNombre);
+        app.get("/api/catalogomuebles/buscar/nombre-contiene", catalogoMuebleController::getCatalogoMueblesByNombreContaining);
         app.get("/api/catalogo-muebles/buscar/descripcion", catalogoMuebleController::getCatalogoMueblesByDescripcionContaining);
-        
-        // Rutas de filtros especiales
-        app.get("/api/catalogo-muebles/con-descripcion", catalogoMuebleController::getCatalogoMueblesWithDescripcion);
-        app.get("/api/catalogo-muebles/sin-descripcion", catalogoMuebleController::getCatalogoMueblesWithoutDescripcion);
-        app.get("/api/catalogo-muebles/ordenados", catalogoMuebleController::getCatalogoMueblesOrderByNombre);
 
-        // Rutas de gestión de descripción
-        app.patch("/api/catalogo-muebles/{id}/descripcion", catalogoMuebleController::actualizarDescripcionMueble);
+        // Ruta para eliminar solo la descripción
         app.delete("/api/catalogo-muebles/{id}/descripcion", catalogoMuebleController::eliminarDescripcionMueble);
-
-        // Rutas de conteo y verificación
-        app.get("/api/catalogo-muebles/count", catalogoMuebleController::countCatalogoMuebles);
-        app.get("/api/catalogo-muebles/exists", catalogoMuebleController::existsByNombreMueble);
     }
 }

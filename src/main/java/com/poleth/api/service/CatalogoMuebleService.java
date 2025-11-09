@@ -14,10 +14,6 @@ public class CatalogoMuebleService {
     }
 
     // Métodos CRUD básicos
-    public CatalogoMueble saveCatalogoMueble(CatalogoMueble catalogoMueble) {
-        return catalogoMuebleRepository.save(catalogoMueble);
-    }
-
     public List<CatalogoMueble> getAllCatalogoMuebles() {
         return catalogoMuebleRepository.findAll();
     }
@@ -28,15 +24,6 @@ public class CatalogoMuebleService {
 
     public void deleteCatalogoMueble(Integer id) {
         catalogoMuebleRepository.delete(id);
-    }
-
-    public boolean existsByNombreMueble(String nombreMueble) {
-        return catalogoMuebleRepository.existsByNombreMueble(nombreMueble);
-    }
-
-    // Método para contar todos los muebles del catálogo
-    public Long countCatalogoMuebles() {
-        return catalogoMuebleRepository.count();
     }
 
     // Método para crear un nuevo mueble en el catálogo con validaciones
@@ -52,7 +39,7 @@ public class CatalogoMuebleService {
         }
 
         // Verificar si el nombre del mueble ya existe
-        if (existsByNombreMueble(catalogoMueble.getNombreMueble())) {
+        if (catalogoMuebleRepository.existsByNombreMueble(catalogoMueble.getNombreMueble())) {
             throw new IllegalArgumentException("El mueble '" + catalogoMueble.getNombreMueble() + "' ya existe en el catálogo");
         }
 
@@ -99,7 +86,7 @@ public class CatalogoMuebleService {
         return catalogoMuebleRepository.existsById(id);
     }
 
-    // Métodos específicos para CatalogoMueble
+    // Métodos específicos para búsquedas
     public Optional<CatalogoMueble> getCatalogoMuebleByNombre(String nombreMueble) {
         return catalogoMuebleRepository.findByNombreMueble(nombreMueble);
     }
@@ -110,31 +97,6 @@ public class CatalogoMuebleService {
 
     public List<CatalogoMueble> getCatalogoMueblesByDescripcionContaining(String texto) {
         return catalogoMuebleRepository.findByDescripcionContaining(texto);
-    }
-
-    public List<CatalogoMueble> getCatalogoMueblesWithDescripcion() {
-        return catalogoMuebleRepository.findWithDescripcion();
-    }
-
-    public List<CatalogoMueble> getCatalogoMueblesWithoutDescripcion() {
-        return catalogoMuebleRepository.findWithoutDescripcion();
-    }
-
-    public List<CatalogoMueble> getCatalogoMueblesOrderByNombre() {
-        return catalogoMuebleRepository.findAllOrderByNombre();
-    }
-
-    // Método para actualizar solo la descripción de un mueble
-    public CatalogoMueble actualizarDescripcionMueble(Integer id, String nuevaDescripcion) {
-        Optional<CatalogoMueble> muebleOpt = catalogoMuebleRepository.findById(id);
-        if (muebleOpt.isEmpty()) {
-            throw new IllegalArgumentException("Mueble no encontrado en el catálogo con ID: " + id);
-        }
-
-        CatalogoMueble mueble = muebleOpt.get();
-        mueble.setDescripcion(nuevaDescripcion);
-
-        return catalogoMuebleRepository.save(mueble);
     }
 
     // Método para eliminar la descripción de un mueble
@@ -148,40 +110,5 @@ public class CatalogoMuebleService {
         mueble.setDescripcion(null);
 
         return catalogoMuebleRepository.save(mueble);
-    }
-
-    // Método para obtener muebles con paginación (simplificado)
-    public List<CatalogoMueble> getCatalogoMueblesPaginados(int pagina, int tamaño) {
-        List<CatalogoMueble> todosMuebles = catalogoMuebleRepository.findAll();
-        int inicio = Math.max(0, (pagina - 1) * tamaño);
-        int fin = Math.min(todosMuebles.size(), inicio + tamaño);
-        
-        if (inicio >= todosMuebles.size()) {
-            return List.of();
-        }
-        
-        return todosMuebles.subList(inicio, fin);
-    }
-
-    // Método para buscar muebles por nombre ordenados y paginados
-    public List<CatalogoMueble> getCatalogoMueblesByNombreContainingPaginados(String texto, int pagina, int tamaño) {
-        List<CatalogoMueble> mueblesFiltrados = catalogoMuebleRepository.findByNombreContaining(texto);
-        int inicio = Math.max(0, (pagina - 1) * tamaño);
-        int fin = Math.min(mueblesFiltrados.size(), inicio + tamaño);
-        
-        if (inicio >= mueblesFiltrados.size()) {
-            return List.of();
-        }
-        
-        return mueblesFiltrados.subList(inicio, fin);
-    }
-
-    // Método para verificar y obtener mueble por nombre (útil para validaciones)
-    public CatalogoMueble getOrThrowByNombre(String nombreMueble) {
-        Optional<CatalogoMueble> muebleOpt = catalogoMuebleRepository.findByNombreMueble(nombreMueble);
-        if (muebleOpt.isEmpty()) {
-            throw new IllegalArgumentException("Mueble no encontrado con nombre: " + nombreMueble);
-        }
-        return muebleOpt.get();
     }
 }

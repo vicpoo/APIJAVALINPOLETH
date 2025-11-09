@@ -19,11 +19,11 @@ public class CatalogoMuebleController {
         this.objectMapper = new ObjectMapper();
     }
 
+    // POST: Crear nuevo mueble en el catálogo
     public void createCatalogoMueble(Context ctx) {
         try {
             CatalogoMueble catalogoMueble = objectMapper.readValue(ctx.body(), CatalogoMueble.class);
 
-            // Usar el método createCatalogoMueble que incluye validaciones
             CatalogoMueble savedCatalogoMueble = catalogoMuebleService.createCatalogoMueble(catalogoMueble);
             ctx.status(HttpStatus.CREATED)
                     .json(savedCatalogoMueble);
@@ -36,6 +36,7 @@ public class CatalogoMuebleController {
         }
     }
 
+    // GET: Obtener todos los muebles del catálogo
     public void getAllCatalogoMuebles(Context ctx) {
         try {
             List<CatalogoMueble> catalogoMuebles = catalogoMuebleService.getAllCatalogoMuebles();
@@ -46,6 +47,7 @@ public class CatalogoMuebleController {
         }
     }
 
+    // GET: Obtener mueble por ID
     public void getCatalogoMuebleById(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
@@ -66,12 +68,12 @@ public class CatalogoMuebleController {
         }
     }
 
+    // PUT: Actualizar mueble completo
     public void updateCatalogoMueble(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
             CatalogoMueble catalogoMuebleActualizado = objectMapper.readValue(ctx.body(), CatalogoMueble.class);
 
-            // Usar el método updateCatalogoMueble que incluye validaciones
             CatalogoMueble updatedCatalogoMueble = catalogoMuebleService.updateCatalogoMueble(id, catalogoMuebleActualizado);
             ctx.json(updatedCatalogoMueble);
         } catch (NumberFormatException e) {
@@ -86,17 +88,17 @@ public class CatalogoMuebleController {
         }
     }
 
+    // DELETE: Eliminar mueble completo
     public void deleteCatalogoMueble(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
-            // Verificar si el mueble existe antes de eliminar
+
             if (!catalogoMuebleService.existsById(id)) {
                 ctx.status(HttpStatus.NOT_FOUND)
                         .json("Mueble no encontrado en el catálogo con ID: " + id);
                 return;
             }
-            
+
             catalogoMuebleService.deleteCatalogoMueble(id);
             ctx.status(HttpStatus.NO_CONTENT);
         } catch (NumberFormatException e) {
@@ -108,8 +110,7 @@ public class CatalogoMuebleController {
         }
     }
 
-    // Métodos específicos para CatalogoMueble
-
+    // GET: Buscar mueble por nombre exacto
     public void getCatalogoMuebleByNombre(Context ctx) {
         try {
             String nombre = ctx.queryParam("nombre");
@@ -133,6 +134,7 @@ public class CatalogoMuebleController {
         }
     }
 
+    // GET: Buscar muebles por nombre que contenga texto
     public void getCatalogoMueblesByNombreContaining(Context ctx) {
         try {
             String texto = ctx.queryParam("texto");
@@ -150,6 +152,7 @@ public class CatalogoMuebleController {
         }
     }
 
+    // GET: Buscar muebles por descripción que contenga texto
     public void getCatalogoMueblesByDescripcionContaining(Context ctx) {
         try {
             String texto = ctx.queryParam("texto");
@@ -167,58 +170,7 @@ public class CatalogoMuebleController {
         }
     }
 
-    public void getCatalogoMueblesWithDescripcion(Context ctx) {
-        try {
-            List<CatalogoMueble> catalogoMuebles = catalogoMuebleService.getCatalogoMueblesWithDescripcion();
-            ctx.json(catalogoMuebles);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener muebles con descripción: " + e.getMessage());
-        }
-    }
-
-    public void getCatalogoMueblesWithoutDescripcion(Context ctx) {
-        try {
-            List<CatalogoMueble> catalogoMuebles = catalogoMuebleService.getCatalogoMueblesWithoutDescripcion();
-            ctx.json(catalogoMuebles);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener muebles sin descripción: " + e.getMessage());
-        }
-    }
-
-    public void getCatalogoMueblesOrderByNombre(Context ctx) {
-        try {
-            List<CatalogoMueble> catalogoMuebles = catalogoMuebleService.getCatalogoMueblesOrderByNombre();
-            ctx.json(catalogoMuebles);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener muebles ordenados: " + e.getMessage());
-        }
-    }
-
-    public void actualizarDescripcionMueble(Context ctx) {
-        try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
-            String body = ctx.body();
-            
-            // Extraer descripcion del cuerpo JSON
-            String nuevaDescripcion = objectMapper.readTree(body).get("descripcion").asText();
-
-            CatalogoMueble catalogoMueble = catalogoMuebleService.actualizarDescripcionMueble(id, nuevaDescripcion);
-            ctx.json(catalogoMueble);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de mueble inválido");
-        } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error al actualizar descripción: " + e.getMessage());
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error interno al actualizar descripción: " + e.getMessage());
-        }
-    }
-
+    // DELETE: Eliminar solo la descripción del mueble
     public void eliminarDescripcionMueble(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
@@ -235,33 +187,4 @@ public class CatalogoMuebleController {
                     .json("Error interno al eliminar descripción: " + e.getMessage());
         }
     }
-
-    public void countCatalogoMuebles(Context ctx) {
-        try {
-            Long count = catalogoMuebleService.countCatalogoMuebles();
-            ctx.json(count);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al contar muebles del catálogo: " + e.getMessage());
-        }
-    }
-
-    public void existsByNombreMueble(Context ctx) {
-        try {
-            String nombre = ctx.queryParam("nombre");
-            if (nombre == null || nombre.isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El parámetro nombre es requerido");
-                return;
-            }
-
-            boolean exists = catalogoMuebleService.existsByNombreMueble(nombre);
-            ctx.json(exists);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al verificar existencia del mueble: " + e.getMessage());
-        }
-    }
-
-
 }
