@@ -26,13 +26,10 @@ public class LoginRoutes {
         // Rutas de búsqueda específicas
         app.get("/api/logins/usuario/{usuario}", loginController::getLoginByUsuario);
         app.get("/api/logins/rol/{idRol}", loginController::getLoginsByRol);
-        app.get("/api/logins/tipo/{tipo}", loginController::getLoginsByTipoUsuario);
         app.get("/api/logins/propietario/{idPropietario}", loginController::getLoginByPropietario);
         app.get("/api/logins/inquilino/{idInquilino}", loginController::getLoginByInquilino);
 
-        // Rutas de verificación y utilidad
+        // Rutas de verificación
         app.get("/api/logins/exists/{usuario}", loginController::existsByUsuario);
-        app.get("/api/logins/stats", loginController::getStats);
-        app.get("/api/logins/count", loginController::countLogins);
     }
 }

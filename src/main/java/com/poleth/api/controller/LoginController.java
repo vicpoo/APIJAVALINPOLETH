@@ -85,39 +85,41 @@ public class LoginController {
         }
     }
 
-    // Autenticar usuario
+    // Autenticar usuario y generar JWT
     public void autenticar(Context ctx) {
         try {
-            String body = ctx.body();
-            String usuario = extractJsonValue(body, "usuario");
-            String contrasena = extractJsonValue(body, "contrasena");
+            AuthRequest authRequest = objectMapper.readValue(ctx.body(), AuthRequest.class);
 
-            if (usuario == null || usuario.trim().isEmpty()) {
+            if (authRequest.getUsuario() == null || authRequest.getUsuario().trim().isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST)
                         .json("El usuario es requerido");
                 return;
             }
 
-            if (contrasena == null || contrasena.trim().isEmpty()) {
+            if (authRequest.getContrasena() == null || authRequest.getContrasena().trim().isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST)
                         .json("La contraseña es requerida");
                 return;
             }
 
-            Optional<Login> login = loginService.autenticar(usuario, contrasena);
+            LoginService.AuthResponse authResponse = loginService.autenticar(
+                    authRequest.getUsuario(),
+                    authRequest.getContrasena()
+            );
 
-            if (login.isPresent()) {
-                // No devolvemos la contraseña por seguridad
-                Login loginResponse = login.get();
-                loginResponse.setContrasena(null);
-                ctx.json(loginResponse);
-            } else {
-                ctx.status(HttpStatus.UNAUTHORIZED)
-                        .json("Credenciales inválidas");
-            }
+            // No devolvemos la contraseña por seguridad
+            authResponse.getLogin().setContrasena(null);
+
+            AuthResponse response = new AuthResponse(
+                    authResponse.getToken(),
+                    authResponse.getLogin()
+            );
+
+            ctx.json(response);
+
         } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error de validación: " + e.getMessage());
+            ctx.status(HttpStatus.UNAUTHORIZED)
+                    .json("Credenciales inválidas: " + e.getMessage());
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .json("Error en la autenticación: " + e.getMessage());
@@ -148,16 +150,15 @@ public class LoginController {
     public void cambiarContrasena(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            String body = ctx.body();
-            String nuevaContrasena = extractJsonValue(body, "nuevaContrasena");
+            CambioContrasenaRequest request = objectMapper.readValue(ctx.body(), CambioContrasenaRequest.class);
 
-            if (nuevaContrasena == null || nuevaContrasena.trim().isEmpty()) {
+            if (request.getNuevaContrasena() == null || request.getNuevaContrasena().trim().isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST)
                         .json("La nueva contraseña es requerida");
                 return;
             }
 
-            boolean success = loginService.cambiarContrasena(id, nuevaContrasena);
+            boolean success = loginService.cambiarContrasena(id, request.getNuevaContrasena());
 
             if (success) {
                 ctx.status(HttpStatus.OK)
@@ -182,7 +183,7 @@ public class LoginController {
     public void deleteLogin(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Verificar si el login existe antes de eliminarlo
             Optional<Login> login = loginService.getLoginById(id);
             if (login.isEmpty()) {
@@ -211,21 +212,6 @@ public class LoginController {
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
                     .json("ID de rol inválido");
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener los logins: " + e.getMessage());
-        }
-    }
-
-    // Obtener logins por tipo de usuario
-    public void getLoginsByTipoUsuario(Context ctx) {
-        try {
-            String tipo = ctx.pathParam("tipo");
-            List<Login> logins = loginService.getLoginsByTipoUsuario(tipo);
-            ctx.json(logins);
-        } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error de validación: " + e.getMessage());
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .json("Error al obtener los logins: " + e.getMessage());
@@ -286,63 +272,44 @@ public class LoginController {
         }
     }
 
-    // Obtener estadísticas de logins
-    public void getStats(Context ctx) {
-        try {
-            LoginService.LoginStats stats = loginService.getStats();
-            ctx.json(stats);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener estadísticas: " + e.getMessage());
-        }
+    // Clases internas para requests/responses
+    private static class AuthRequest {
+        private String usuario;
+        private String contrasena;
+
+        public String getUsuario() { return usuario; }
+        public void setUsuario(String usuario) { this.usuario = usuario; }
+        public String getContrasena() { return contrasena; }
+        public void setContrasena(String contrasena) { this.contrasena = contrasena; }
     }
 
-    // Contar logins
-    public void countLogins(Context ctx) {
-        try {
-            Long count = loginService.countLogins();
-            ctx.json(new CountResponse(count));
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al contar los logins: " + e.getMessage());
-        }
+    private static class CambioContrasenaRequest {
+        private String nuevaContrasena;
+
+        public String getNuevaContrasena() { return nuevaContrasena; }
+        public void setNuevaContrasena(String nuevaContrasena) { this.nuevaContrasena = nuevaContrasena; }
     }
 
-    // Método auxiliar para extraer valores del JSON
-    private String extractJsonValue(String json, String key) {
-        try {
-            // Buscar el key en el JSON y extraer su valor
-            String[] parts = json.split("\"" + key + "\"");
-            if (parts.length > 1) {
-                String valuePart = parts[1].split("\"")[1];
-                return valuePart;
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+    private static class AuthResponse {
+        private final String token;
+        private final Login login;
 
-    // Clases internas para respuestas JSON
-    private static class CountResponse {
-        private final Long count;
-        
-        public CountResponse(Long count) {
-            this.count = count;
+        public AuthResponse(String token, Login login) {
+            this.token = token;
+            this.login = login;
         }
-        
-        public Long getCount() {
-            return count;
-        }
+
+        public String getToken() { return token; }
+        public Login getLogin() { return login; }
     }
 
     private static class ExistsResponse {
         private final boolean exists;
-        
+
         public ExistsResponse(boolean exists) {
             this.exists = exists;
         }
-        
+
         public boolean isExists() {
             return exists;
         }

@@ -9,6 +9,7 @@ import com.poleth.api.repository.LoginRepository;
 import com.poleth.api.repository.RolRepository;
 import com.poleth.api.repository.PropietarioRepository;
 import com.poleth.api.repository.InquilinoRepository;
+import com.poleth.api.util.JWTUtil;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +19,8 @@ public class LoginService {
     private final PropietarioRepository propietarioRepository;
     private final InquilinoRepository inquilinoRepository;
 
-    public LoginService(LoginRepository loginRepository, RolRepository rolRepository, 
-                       PropietarioRepository propietarioRepository, InquilinoRepository inquilinoRepository) {
+    public LoginService(LoginRepository loginRepository, RolRepository rolRepository,
+                        PropietarioRepository propietarioRepository, InquilinoRepository inquilinoRepository) {
         this.loginRepository = loginRepository;
         this.rolRepository = rolRepository;
         this.propietarioRepository = propietarioRepository;
@@ -87,43 +88,6 @@ public class LoginService {
         }
         login.setRol(rolExistente.get());
 
-        // Validar relaciones únicas
-        if (login.getPropietario() != null && login.getPropietario().getIdPropietario() != null) {
-            Optional<Propietario> propietarioExistente = propietarioRepository.findById(login.getPropietario().getIdPropietario());
-            if (propietarioExistente.isEmpty()) {
-                throw new IllegalArgumentException("El propietario especificado no existe");
-            }
-            login.setPropietario(propietarioExistente.get());
-
-            // Verificar que no exista ya un login para este propietario
-            if (loginRepository.existsByPropietario(login.getPropietario().getIdPropietario())) {
-                throw new IllegalArgumentException("Ya existe un login para este propietario");
-            }
-        }
-
-        if (login.getInquilino() != null && login.getInquilino().getIdInquilino() != null) {
-            Optional<Inquilino> inquilinoExistente = inquilinoRepository.findById(login.getInquilino().getIdInquilino());
-            if (inquilinoExistente.isEmpty()) {
-                throw new IllegalArgumentException("El inquilino especificado no existe");
-            }
-            login.setInquilino(inquilinoExistente.get());
-
-            // Verificar que no exista ya un login para este inquilino
-            if (loginRepository.existsByInquilino(login.getInquilino().getIdInquilino())) {
-                throw new IllegalArgumentException("Ya existe un login para este inquilino");
-            }
-        }
-
-        // Solo puede tener una relación (propietario, inquilino o invitado)
-        int relaciones = 0;
-        if (login.getPropietario() != null) relaciones++;
-        if (login.getInquilino() != null) relaciones++;
-        if (login.getInvitado() != null) relaciones++;
-
-        if (relaciones > 1) {
-            throw new IllegalArgumentException("El login solo puede estar asociado a un tipo de usuario (propietario, inquilino o invitado)");
-        }
-
         // Guardar el login
         return loginRepository.save(login);
     }
@@ -181,8 +145,8 @@ public class LoginService {
         return loginRepository.save(loginExistente);
     }
 
-    // Método para autenticar usuario
-    public Optional<Login> autenticar(String usuario, String contrasena) {
+    // Método para autenticar usuario y generar JWT
+    public AuthResponse autenticar(String usuario, String contrasena) {
         if (usuario == null || usuario.trim().isEmpty()) {
             throw new IllegalArgumentException("El usuario es requerido");
         }
@@ -191,7 +155,14 @@ public class LoginService {
             throw new IllegalArgumentException("La contraseña es requerida");
         }
 
-        return loginRepository.autenticar(usuario, contrasena);
+        Optional<Login> login = loginRepository.autenticar(usuario, contrasena);
+
+        if (login.isPresent()) {
+            String token = JWTUtil.generarToken(login.get());
+            return new AuthResponse(token, login.get());
+        } else {
+            throw new IllegalArgumentException("Credenciales inválidas");
+        }
     }
 
     // Método para cambiar contraseña
@@ -218,21 +189,6 @@ public class LoginService {
         return loginRepository.findByRol(idRol);
     }
 
-    // Método para buscar logins por tipo de usuario
-    public List<Login> getLoginsByTipoUsuario(String tipo) {
-        if (tipo == null || tipo.trim().isEmpty()) {
-            throw new IllegalArgumentException("El tipo de usuario es requerido");
-        }
-
-        String tipoUpper = tipo.toUpperCase();
-        if (!tipoUpper.equals("PROPIETARIO") && !tipoUpper.equals("INQUILINO") && 
-            !tipoUpper.equals("INVITADO") && !tipoUpper.equals("SISTEMA")) {
-            throw new IllegalArgumentException("Tipo de usuario no válido. Use: PROPIETARIO, INQUILINO, INVITADO o SISTEMA");
-        }
-
-        return loginRepository.findByTipoUsuario(tipoUpper);
-    }
-
     // Método para obtener login por propietario
     public Optional<Login> getLoginByPropietario(Integer idPropietario) {
         return loginRepository.findByPropietario(idPropietario);
@@ -248,60 +204,22 @@ public class LoginService {
         return loginRepository.findById(id).isPresent();
     }
 
-    // Método para contar todos los logins
-    public Long countLogins() {
-        return loginRepository.count();
-    }
+    // Clase para respuesta de autenticación
+    public static class AuthResponse {
+        private final String token;
+        private final Login login;
 
-    // Método para obtener estadísticas básicas
-    public LoginStats getStats() {
-        List<Login> todosLogins = loginRepository.findAll();
-        Long totalLogins = (long) todosLogins.size();
-        Long loginsPropietarios = todosLogins.stream()
-                .filter(Login::isPropietario)
-                .count();
-        Long loginsInquilinos = todosLogins.stream()
-                .filter(Login::isInquilino)
-                .count();
-        Long loginsSistema = todosLogins.stream()
-                .filter(l -> !l.isPropietario() && !l.isInquilino() && !l.isInvitado())
-                .count();
-
-        return new LoginStats(totalLogins, loginsPropietarios, loginsInquilinos, loginsSistema);
-    }
-
-    // Clase interna para estadísticas
-    public static class LoginStats {
-        private final Long totalLogins;
-        private final Long loginsPropietarios;
-        private final Long loginsInquilinos;
-        private final Long loginsSistema;
-
-        public LoginStats(Long totalLogins, Long loginsPropietarios, Long loginsInquilinos, Long loginsSistema) {
-            this.totalLogins = totalLogins;
-            this.loginsPropietarios = loginsPropietarios;
-            this.loginsInquilinos = loginsInquilinos;
-            this.loginsSistema = loginsSistema;
+        public AuthResponse(String token, Login login) {
+            this.token = token;
+            this.login = login;
         }
 
-        public Long getTotalLogins() {
-            return totalLogins;
+        public String getToken() {
+            return token;
         }
 
-        public Long getLoginsPropietarios() {
-            return loginsPropietarios;
-        }
-
-        public Long getLoginsInquilinos() {
-            return loginsInquilinos;
-        }
-
-        public Long getLoginsSistema() {
-            return loginsSistema;
-        }
-
-        public Long getLoginsInvitados() {
-            return totalLogins - loginsPropietarios - loginsInquilinos - loginsSistema;
+        public Login getLogin() {
+            return login;
         }
     }
 }

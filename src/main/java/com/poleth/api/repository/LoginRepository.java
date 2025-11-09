@@ -135,22 +135,6 @@ public class LoginRepository {
         }
     }
 
-    // Método para buscar login por invitado
-    public Optional<Login> findByInvitado(Integer idInvitado) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            return em.createQuery(
-                            "SELECT l FROM Login l WHERE l.invitado.idInvitado = :idInvitado", Login.class)
-                    .setParameter("idInvitado", idInvitado)
-                    .getResultStream()
-                    .findFirst();
-        } catch (NoResultException e) {
-            return Optional.empty();
-        } finally {
-            em.close();
-        }
-    }
-
     // Método para verificar existencia de login por usuario
     public boolean existsByUsuario(String usuario) {
         EntityManager em = DatabaseConfig.createEntityManager();
@@ -160,101 +144,6 @@ public class LoginRepository {
                     .setParameter("usuario", usuario)
                     .getSingleResult();
             return count > 0;
-        } finally {
-            em.close();
-        }
-    }
-
-    // Método para verificar si existe login para un propietario
-    public boolean existsByPropietario(Integer idPropietario) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            Long count = em.createQuery(
-                            "SELECT COUNT(l) FROM Login l WHERE l.propietario.idPropietario = :idPropietario", Long.class)
-                    .setParameter("idPropietario", idPropietario)
-                    .getSingleResult();
-            return count > 0;
-        } finally {
-            em.close();
-        }
-    }
-
-    // Método para verificar si existe login para un inquilino
-    public boolean existsByInquilino(Integer idInquilino) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            Long count = em.createQuery(
-                            "SELECT COUNT(l) FROM Login l WHERE l.inquilino.idInquilino = :idInquilino", Long.class)
-                    .setParameter("idInquilino", idInquilino)
-                    .getSingleResult();
-            return count > 0;
-        } finally {
-            em.close();
-        }
-    }
-
-    // Método para verificar si existe login para un invitado
-    public boolean existsByInvitado(Integer idInvitado) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            Long count = em.createQuery(
-                            "SELECT COUNT(l) FROM Login l WHERE l.invitado.idInvitado = :idInvitado", Long.class)
-                    .setParameter("idInvitado", idInvitado)
-                    .getSingleResult();
-            return count > 0;
-        } finally {
-            em.close();
-        }
-    }
-
-    // Método adicional: contar todos los logins
-    public Long count() {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            return em.createQuery("SELECT COUNT(l) FROM Login l", Long.class)
-                    .getSingleResult();
-        } finally {
-            em.close();
-        }
-    }
-
-    // Método para buscar logins con paginación
-    public List<Login> findPaginados(int inicio, int tamaño) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            return em.createQuery("SELECT l FROM Login l", Login.class)
-                    .setFirstResult(inicio)
-                    .setMaxResults(tamaño)
-                    .getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    // Método para buscar logins por tipo de usuario
-    public List<Login> findByTipoUsuario(String tipo) {
-        EntityManager em = DatabaseConfig.createEntityManager();
-        try {
-            String query = "";
-            switch (tipo.toUpperCase()) {
-                case "PROPIETARIO":
-                    query = "SELECT l FROM Login l WHERE l.propietario IS NOT NULL";
-                    break;
-                case "INQUILINO":
-                    query = "SELECT l FROM Login l WHERE l.inquilino IS NOT NULL";
-                    break;
-                case "INVITADO":
-                    query = "SELECT l FROM Login l WHERE l.invitado IS NOT NULL";
-                    break;
-                case "SISTEMA":
-                    query = "SELECT l FROM Login l WHERE l.propietario IS NULL AND l.inquilino IS NULL AND l.invitado IS NULL";
-                    break;
-                default:
-                    return List.of();
-            }
-            
-            return em.createQuery(query, Login.class)
-                    .getResultList();
         } finally {
             em.close();
         }
