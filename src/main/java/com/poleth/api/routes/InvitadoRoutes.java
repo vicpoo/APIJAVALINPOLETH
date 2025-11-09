@@ -19,19 +19,7 @@ public class InvitadoRoutes {
         app.put("/api/invitados/{id}", invitadoController::updateInvitado);
         app.delete("/api/invitados/{id}", invitadoController::deleteInvitado);
 
-        // Rutas de búsqueda y consultas específicas
-        app.get("/api/invitados/email", invitadoController::getInvitadoByEmail);
-        app.get("/api/invitados/nombre", invitadoController::getInvitadosByNombre);
-        app.get("/api/invitados/count", invitadoController::countInvitados);
-
-        // Rutas para gestión de cuartos
+        // Ruta específica para obtener invitados por cuarto
         app.get("/api/invitados/cuarto/{idCuarto}", invitadoController::getInvitadosByCuarto);
-        app.get("/api/invitados/sin-cuarto", invitadoController::getInvitadosWithoutCuarto);
-        app.post("/api/invitados/{id}/asignar-cuarto", invitadoController::asignarCuarto);
-        app.post("/api/invitados/{id}/remover-cuarto", invitadoController::removerCuarto);
-
-        // Rutas para gestión de imágenes
-        app.post("/api/invitados/{id}/asignar-imagen", invitadoController::asignarImagen);
-        app.post("/api/invitados/{id}/remover-imagen", invitadoController::removerImagen);
     }
 }

@@ -26,21 +26,8 @@ public class InvitadoService {
         return invitadoRepository.findById(id);
     }
 
-    public Optional<Invitado> getInvitadoByEmail(String email) {
-        return invitadoRepository.findByEmail(email);
-    }
-
     public void deleteInvitado(Integer id) {
         invitadoRepository.delete(id);
-    }
-
-    public boolean existsByEmail(String email) {
-        return invitadoRepository.existsByEmail(email);
-    }
-
-    // Método para contar todos los invitados
-    public Long countInvitados() {
-        return invitadoRepository.count();
     }
 
     // Método para crear un nuevo invitado con validaciones
@@ -66,11 +53,6 @@ public class InvitadoService {
         // Validar formato de email básico
         if (!isValidEmail(invitado.getEmail())) {
             throw new IllegalArgumentException("El formato del email no es válido");
-        }
-
-        // Verificar si el email ya existe
-        if (existsByEmail(invitado.getEmail())) {
-            throw new IllegalArgumentException("El email '" + invitado.getEmail() + "' ya está registrado");
         }
 
         // Guardar el invitado
@@ -110,12 +92,6 @@ public class InvitadoService {
 
         Invitado invitadoExistente = invitadoExistenteOpt.get();
 
-        // Verificar si el nuevo email ya existe (excluyendo el invitado actual)
-        Optional<Invitado> invitadoConMismoEmail = invitadoRepository.findByEmail(invitadoActualizado.getEmail());
-        if (invitadoConMismoEmail.isPresent() && !invitadoConMismoEmail.get().getIdInvitado().equals(id)) {
-            throw new IllegalArgumentException("El email '" + invitadoActualizado.getEmail() + "' ya está registrado");
-        }
-
         // Actualizar los campos
         invitadoExistente.setNombre(invitadoActualizado.getNombre());
         invitadoExistente.setEmail(invitadoActualizado.getEmail());
@@ -131,84 +107,15 @@ public class InvitadoService {
         return invitadoRepository.findById(id).isPresent();
     }
 
-
-    // Métodos específicos para Invitado
-    public List<Invitado> getInvitadosByNombre(String nombre) {
-        return invitadoRepository.findByNombre(nombre);
-    }
-
+    // Método específico para Invitado
     public List<Invitado> getInvitadosByCuarto(Integer idCuartoAcceso) {
         return invitadoRepository.findByIdCuartoAcceso(idCuartoAcceso);
-    }
-
-    public List<Invitado> getInvitadosByImagen(Integer idImagenVista) {
-        return invitadoRepository.findByIdImagenVista(idImagenVista);
-    }
-
-    public List<Invitado> getInvitadosWithoutCuarto() {
-        return invitadoRepository.findWithoutCuarto();
-    }
-
-    public List<Invitado> getInvitadosWithoutImagen() {
-        return invitadoRepository.findWithoutImagen();
-    }
-
-    // Método para asignar cuarto a un invitado
-    public Invitado asignarCuarto(Integer idInvitado, Integer idCuartoAcceso) {
-        Optional<Invitado> invitadoOpt = invitadoRepository.findById(idInvitado);
-        if (invitadoOpt.isEmpty()) {
-            throw new IllegalArgumentException("Invitado no encontrado con ID: " + idInvitado);
-        }
-
-        Invitado invitado = invitadoOpt.get();
-        invitado.setIdCuartoAcceso(idCuartoAcceso);
-
-        return invitadoRepository.save(invitado);
-    }
-
-    // Método para asignar imagen a un invitado
-    public Invitado asignarImagen(Integer idInvitado, Integer idImagenVista) {
-        Optional<Invitado> invitadoOpt = invitadoRepository.findById(idInvitado);
-        if (invitadoOpt.isEmpty()) {
-            throw new IllegalArgumentException("Invitado no encontrado con ID: " + idInvitado);
-        }
-
-        Invitado invitado = invitadoOpt.get();
-        invitado.setIdImagenVista(idImagenVista);
-
-        return invitadoRepository.save(invitado);
-    }
-
-    // Método para remover cuarto de un invitado
-    public Invitado removerCuarto(Integer idInvitado) {
-        Optional<Invitado> invitadoOpt = invitadoRepository.findById(idInvitado);
-        if (invitadoOpt.isEmpty()) {
-            throw new IllegalArgumentException("Invitado no encontrado con ID: " + idInvitado);
-        }
-
-        Invitado invitado = invitadoOpt.get();
-        invitado.setIdCuartoAcceso(null);
-
-        return invitadoRepository.save(invitado);
-    }
-
-    // Método para remover imagen de un invitado
-    public Invitado removerImagen(Integer idInvitado) {
-        Optional<Invitado> invitadoOpt = invitadoRepository.findById(idInvitado);
-        if (invitadoOpt.isEmpty()) {
-            throw new IllegalArgumentException("Invitado no encontrado con ID: " + idInvitado);
-        }
-
-        Invitado invitado = invitadoOpt.get();
-        invitado.setIdImagenVista(null);
-
-        return invitadoRepository.save(invitado);
     }
 
     // Método auxiliar para validar formato de email
     private boolean isValidEmail(String email) {
         if (email == null) return false;
-        
+
         // Validación básica de formato de email
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         return email.matches(emailRegex);

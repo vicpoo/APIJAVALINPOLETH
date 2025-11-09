@@ -19,6 +19,7 @@ public class InvitadoController {
         this.objectMapper = new ObjectMapper();
     }
 
+    // Crear un nuevo invitado
     public void createInvitado(Context ctx) {
         try {
             Invitado invitado = objectMapper.readValue(ctx.body(), Invitado.class);
@@ -36,6 +37,7 @@ public class InvitadoController {
         }
     }
 
+    // Obtener todos los invitados
     public void getAllInvitados(Context ctx) {
         try {
             List<Invitado> invitados = invitadoService.getAllInvitados();
@@ -46,6 +48,7 @@ public class InvitadoController {
         }
     }
 
+    // Obtener invitado por ID
     public void getInvitadoById(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
@@ -66,29 +69,22 @@ public class InvitadoController {
         }
     }
 
-    public void getInvitadoByEmail(Context ctx) {
+    // Obtener invitados por cuarto
+    public void getInvitadosByCuarto(Context ctx) {
         try {
-            String email = ctx.queryParam("email");
-            if (email == null || email.isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El parámetro email es requerido");
-                return;
-            }
-
-            Optional<Invitado> invitado = invitadoService.getInvitadoByEmail(email);
-
-            if (invitado.isPresent()) {
-                ctx.json(invitado.get());
-            } else {
-                ctx.status(HttpStatus.NOT_FOUND)
-                        .json("Invitado no encontrado con email: " + email);
-            }
+            Integer idCuarto = Integer.parseInt(ctx.pathParam("idCuarto"));
+            List<Invitado> invitados = invitadoService.getInvitadosByCuarto(idCuarto);
+            ctx.json(invitados);
+        } catch (NumberFormatException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("ID de cuarto inválido");
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al buscar el invitado: " + e.getMessage());
+                    .json("Error al obtener invitados del cuarto: " + e.getMessage());
         }
     }
 
+    // Actualizar invitado
     public void updateInvitado(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
@@ -109,17 +105,18 @@ public class InvitadoController {
         }
     }
 
+    // Eliminar invitado
     public void deleteInvitado(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
+
             // Verificar si el invitado existe antes de eliminar
             if (!invitadoService.existsById(id)) {
                 ctx.status(HttpStatus.NOT_FOUND)
                         .json("Invitado no encontrado con ID: " + id);
                 return;
             }
-            
+
             invitadoService.deleteInvitado(id);
             ctx.status(HttpStatus.NO_CONTENT);
         } catch (NumberFormatException e) {
@@ -130,136 +127,4 @@ public class InvitadoController {
                     .json("Error al eliminar el invitado: " + e.getMessage());
         }
     }
-
-    // Métodos específicos para Invitado
-
-    public void getInvitadosByNombre(Context ctx) {
-        try {
-            String nombre = ctx.queryParam("nombre");
-            if (nombre == null || nombre.isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El parámetro nombre es requerido");
-                return;
-            }
-
-            List<Invitado> invitados = invitadoService.getInvitadosByNombre(nombre);
-            ctx.json(invitados);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al buscar invitados por nombre: " + e.getMessage());
-        }
-    }
-
-    public void getInvitadosByCuarto(Context ctx) {
-        try {
-            Integer idCuarto = Integer.parseInt(ctx.pathParam("idCuarto"));
-            List<Invitado> invitados = invitadoService.getInvitadosByCuarto(idCuarto);
-            ctx.json(invitados);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de cuarto inválido");
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener invitados del cuarto: " + e.getMessage());
-        }
-    }
-
-    public void getInvitadosWithoutCuarto(Context ctx) {
-        try {
-            List<Invitado> invitados = invitadoService.getInvitadosWithoutCuarto();
-            ctx.json(invitados);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener invitados sin cuarto: " + e.getMessage());
-        }
-    }
-
-    public void asignarCuarto(Context ctx) {
-        try {
-            Integer idInvitado = Integer.parseInt(ctx.pathParam("id"));
-            String body = ctx.body();
-            
-            // Extraer idCuartoAcceso del cuerpo JSON
-            Integer idCuartoAcceso = objectMapper.readTree(body).get("idCuartoAcceso").asInt();
-
-            Invitado invitado = invitadoService.asignarCuarto(idInvitado, idCuartoAcceso);
-            ctx.json(invitado);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID inválido");
-        } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error al asignar cuarto: " + e.getMessage());
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error interno al asignar cuarto: " + e.getMessage());
-        }
-    }
-
-    public void removerCuarto(Context ctx) {
-        try {
-            Integer idInvitado = Integer.parseInt(ctx.pathParam("id"));
-            Invitado invitado = invitadoService.removerCuarto(idInvitado);
-            ctx.json(invitado);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de invitado inválido");
-        } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error al remover cuarto: " + e.getMessage());
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error interno al remover cuarto: " + e.getMessage());
-        }
-    }
-
-    public void asignarImagen(Context ctx) {
-        try {
-            Integer idInvitado = Integer.parseInt(ctx.pathParam("id"));
-            String body = ctx.body();
-            
-            // Extraer idImagenVista del cuerpo JSON
-            Integer idImagenVista = objectMapper.readTree(body).get("idImagenVista").asInt();
-
-            Invitado invitado = invitadoService.asignarImagen(idInvitado, idImagenVista);
-            ctx.json(invitado);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID inválido");
-        } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error al asignar imagen: " + e.getMessage());
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error interno al asignar imagen: " + e.getMessage());
-        }
-    }
-
-    public void removerImagen(Context ctx) {
-        try {
-            Integer idInvitado = Integer.parseInt(ctx.pathParam("id"));
-            Invitado invitado = invitadoService.removerImagen(idInvitado);
-            ctx.json(invitado);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de invitado inválido");
-        } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error al remover imagen: " + e.getMessage());
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error interno al remover imagen: " + e.getMessage());
-        }
-    }
-
-    public void countInvitados(Context ctx) {
-        try {
-            Long count = invitadoService.countInvitados();
-            ctx.json(count);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al contar invitados: " + e.getMessage());
-        }
-    }
-
 }
