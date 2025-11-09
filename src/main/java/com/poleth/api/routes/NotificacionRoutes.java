@@ -19,11 +19,8 @@ public class NotificacionRoutes {
         app.put("/api/notificaciones/{id}", notificacionController::updateNotificacion);
         app.delete("/api/notificaciones/{id}", notificacionController::deleteNotificacion);
 
-        // Rutas de búsqueda por entidades relacionadas
+        // Rutas de búsqueda específicas
         app.get("/api/notificaciones/inquilino/{idInquilino}", notificacionController::getNotificacionesByInquilino);
-
-        // Rutas de búsqueda por fecha
         app.get("/api/notificaciones/fecha/{fecha}", notificacionController::getNotificacionesByFechaUtilizacion);
-    
     }
 }
