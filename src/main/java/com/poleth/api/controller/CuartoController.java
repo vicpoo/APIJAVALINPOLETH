@@ -20,6 +20,7 @@ public class CuartoController {
         this.objectMapper = new ObjectMapper();
     }
 
+    // POST: Crear un nuevo cuarto
     public void createCuarto(Context ctx) {
         try {
             Cuarto cuarto = objectMapper.readValue(ctx.body(), Cuarto.class);
@@ -37,6 +38,7 @@ public class CuartoController {
         }
     }
 
+    // GET: Obtener todos los cuartos
     public void getAllCuartos(Context ctx) {
         try {
             List<Cuarto> cuartos = cuartoService.getAllCuartos();
@@ -47,6 +49,7 @@ public class CuartoController {
         }
     }
 
+    // GET: Obtener cuarto por ID
     public void getCuartoById(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
@@ -67,6 +70,22 @@ public class CuartoController {
         }
     }
 
+    // GET: Obtener cuartos por propietario
+    public void getCuartosByPropietario(Context ctx) {
+        try {
+            Integer idPropietario = Integer.parseInt(ctx.pathParam("idPropietario"));
+            List<Cuarto> cuartos = cuartoService.getCuartosByPropietario(idPropietario);
+            ctx.json(cuartos);
+        } catch (NumberFormatException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("ID de propietario inválido");
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener cuartos del propietario: " + e.getMessage());
+        }
+    }
+
+    // PUT: Actualizar cuarto completo
     public void updateCuarto(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
@@ -87,110 +106,12 @@ public class CuartoController {
         }
     }
 
-    public void deleteCuarto(Context ctx) {
-        try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
-            
-            // Verificar si el cuarto existe antes de eliminar
-            if (!cuartoService.existsById(id)) {
-                ctx.status(HttpStatus.NOT_FOUND)
-                        .json("Cuarto no encontrado con ID: " + id);
-                return;
-            }
-            
-            cuartoService.deleteCuarto(id);
-            ctx.status(HttpStatus.NO_CONTENT);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de cuarto inválido");
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al eliminar el cuarto: " + e.getMessage());
-        }
-    }
-
-    // Métodos específicos para Cuarto
-
-    public void getCuartosByPropietario(Context ctx) {
-        try {
-            Integer idPropietario = Integer.parseInt(ctx.pathParam("idPropietario"));
-            List<Cuarto> cuartos = cuartoService.getCuartosByPropietario(idPropietario);
-            ctx.json(cuartos);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de propietario inválido");
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener cuartos del propietario: " + e.getMessage());
-        }
-    }
-
-    public void getCuartosByNombre(Context ctx) {
-        try {
-            String nombre = ctx.queryParam("nombre");
-            if (nombre == null || nombre.isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El parámetro nombre es requerido");
-                return;
-            }
-
-            List<Cuarto> cuartos = cuartoService.getCuartosByNombre(nombre);
-            ctx.json(cuartos);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al buscar cuartos por nombre: " + e.getMessage());
-        }
-    }
-
-    public void getCuartosByEstado(Context ctx) {
-        try {
-            String estado = ctx.queryParam("estado");
-            if (estado == null || estado.isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El parámetro estado es requerido");
-                return;
-            }
-
-            List<Cuarto> cuartos = cuartoService.getCuartosByEstado(estado);
-            ctx.json(cuartos);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al buscar cuartos por estado: " + e.getMessage());
-        }
-    }
-
-    public void getCuartosAvailable(Context ctx) {
-        try {
-            List<Cuarto> cuartos = cuartoService.getCuartosAvailable();
-            ctx.json(cuartos);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener cuartos disponibles: " + e.getMessage());
-        }
-    }
-
-    public void getCuartosByDescripcion(Context ctx) {
-        try {
-            String texto = ctx.queryParam("texto");
-            if (texto == null || texto.isEmpty()) {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El parámetro texto es requerido");
-                return;
-            }
-
-            List<Cuarto> cuartos = cuartoService.getCuartosByDescripcionContaining(texto);
-            ctx.json(cuartos);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al buscar cuartos por descripción: " + e.getMessage());
-        }
-    }
-
+    // PATCH: Cambiar estado del cuarto
     public void cambiarEstadoCuarto(Context ctx) {
         try {
             Integer idCuarto = Integer.parseInt(ctx.pathParam("id"));
             String body = ctx.body();
-            
+
             // Extraer nuevoEstado del cuerpo JSON
             String nuevoEstado = objectMapper.readTree(body).get("estado").asText();
 
@@ -208,11 +129,12 @@ public class CuartoController {
         }
     }
 
+    // PATCH: Actualizar precio del cuarto
     public void actualizarPrecioCuarto(Context ctx) {
         try {
             Integer idCuarto = Integer.parseInt(ctx.pathParam("id"));
             String body = ctx.body();
-            
+
             // Extraer nuevoPrecio del cuerpo JSON
             BigDecimal nuevoPrecio = new BigDecimal(objectMapper.readTree(body).get("precio").asText());
 
@@ -230,42 +152,26 @@ public class CuartoController {
         }
     }
 
-    public void countCuartos(Context ctx) {
+    // DELETE: Eliminar cuarto
+    public void deleteCuarto(Context ctx) {
         try {
-            Long count = cuartoService.countCuartos();
-            ctx.json(count);
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al contar cuartos: " + e.getMessage());
-        }
-    }
+            Integer id = Integer.parseInt(ctx.pathParam("id"));
 
-    public void countCuartosByPropietario(Context ctx) {
-        try {
-            Integer idPropietario = Integer.parseInt(ctx.pathParam("idPropietario"));
-            Long count = cuartoService.countCuartosByPropietario(idPropietario);
-            ctx.json(count);
+            // Verificar si el cuarto existe antes de eliminar
+            if (!cuartoService.existsById(id)) {
+                ctx.status(HttpStatus.NOT_FOUND)
+                        .json("Cuarto no encontrado con ID: " + id);
+                return;
+            }
+
+            cuartoService.deleteCuarto(id);
+            ctx.status(HttpStatus.NO_CONTENT);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de propietario inválido");
+                    .json("ID de cuarto inválido");
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al contar cuartos del propietario: " + e.getMessage());
-        }
-    }
-
-
-    public void existsByPropietario(Context ctx) {
-        try {
-            Integer idPropietario = Integer.parseInt(ctx.pathParam("idPropietario"));
-            boolean exists = cuartoService.existsByPropietario(idPropietario);
-            ctx.json(exists);
-        } catch (NumberFormatException e) {
-            ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de propietario inválido");
-        } catch (Exception e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al verificar existencia de cuartos: " + e.getMessage());
+                    .json("Error al eliminar el cuarto: " + e.getMessage());
         }
     }
 }

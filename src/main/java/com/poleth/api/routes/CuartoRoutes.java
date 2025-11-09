@@ -19,20 +19,11 @@ public class CuartoRoutes {
         app.put("/api/cuartos/{id}", cuartoController::updateCuarto);
         app.delete("/api/cuartos/{id}", cuartoController::deleteCuarto);
 
-        // Rutas de búsqueda y consultas específicas
+        // Rutas específicas según tus requerimientos
         app.get("/api/cuartos/propietario/{idPropietario}", cuartoController::getCuartosByPropietario);
-        app.get("/api/cuartos/nombre", cuartoController::getCuartosByNombre);
-        app.get("/api/cuartos/estado", cuartoController::getCuartosByEstado);
-        app.get("/api/cuartos/disponibles", cuartoController::getCuartosAvailable);
-        app.get("/api/cuartos/buscar", cuartoController::getCuartosByDescripcion);
-        
+
         // Rutas de gestión
         app.patch("/api/cuartos/{id}/estado", cuartoController::cambiarEstadoCuarto);
         app.patch("/api/cuartos/{id}/precio", cuartoController::actualizarPrecioCuarto);
-
-        // Rutas de conteo y verificación
-        app.get("/api/cuartos/count", cuartoController::countCuartos);
-        app.get("/api/cuartos/propietario/{idPropietario}/count", cuartoController::countCuartosByPropietario);
-        app.get("/api/cuartos/propietario/{idPropietario}/exists", cuartoController::existsByPropietario);
     }
 }

@@ -15,13 +15,6 @@ public class CuartoService {
     }
 
     // Métodos CRUD básicos
-    public Cuarto saveCuarto(Cuarto cuarto) {
-        Cuarto cuartoGuardado = cuartoRepository.save(cuarto);
-        // Recargar con relaciones para evitar LazyInitializationException
-        return cuartoRepository.findById(cuartoGuardado.getIdCuarto())
-                .orElseThrow(() -> new RuntimeException("Error al recuperar el cuarto guardado"));
-    }
-
     public List<Cuarto> getAllCuartos() {
         return cuartoRepository.findAll();
     }
@@ -32,15 +25,6 @@ public class CuartoService {
 
     public void deleteCuarto(Integer id) {
         cuartoRepository.delete(id);
-    }
-
-    public boolean existsByPropietario(Integer idPropietario) {
-        return cuartoRepository.existsByPropietario(idPropietario);
-    }
-
-    // Método para contar todos los cuartos
-    public Long countCuartos() {
-        return cuartoRepository.count();
     }
 
     // Método para crear un nuevo cuarto con validaciones
@@ -75,13 +59,13 @@ public class CuartoService {
 
         // Guardar el cuarto
         Cuarto cuartoGuardado = cuartoRepository.save(cuarto);
-        
+
         // Recargar con relaciones para evitar LazyInitializationException
         return cuartoRepository.findById(cuartoGuardado.getIdCuarto())
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el cuarto creado"));
     }
 
-    // Método para actualizar un cuarto existente - CORREGIDO
+    // Método para actualizar un cuarto existente
     public Cuarto updateCuarto(Integer id, Cuarto cuartoActualizado) {
         // Validaciones básicas
         if (cuartoActualizado.getNombreCuarto() == null || cuartoActualizado.getNombreCuarto().trim().isEmpty()) {
@@ -112,7 +96,7 @@ public class CuartoService {
 
         // Verificar si el nuevo nombre ya existe para el mismo propietario (excluyendo el cuarto actual)
         if (!cuartoExistente.getNombreCuarto().equals(cuartoActualizado.getNombreCuarto()) &&
-            cuartoRepository.existsByNombreAndPropietario(cuartoActualizado.getNombreCuarto(), cuartoExistente.getIdPropietario())) {
+                cuartoRepository.existsByNombreAndPropietario(cuartoActualizado.getNombreCuarto(), cuartoExistente.getIdPropietario())) {
             throw new IllegalArgumentException("Ya existe un cuarto con el nombre '" + cuartoActualizado.getNombreCuarto() + "' para este propietario");
         }
 
@@ -124,7 +108,7 @@ public class CuartoService {
 
         // Guardar los cambios
         cuartoRepository.save(cuartoExistente);
-        
+
         // Obtener el cuarto actualizado CON la relación propietario cargada
         return cuartoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el cuarto actualizado"));
@@ -135,33 +119,12 @@ public class CuartoService {
         return cuartoRepository.findById(id).isPresent();
     }
 
-    // Métodos específicos para Cuarto
+    // Método para obtener cuartos por propietario
     public List<Cuarto> getCuartosByPropietario(Integer idPropietario) {
         return cuartoRepository.findByIdPropietario(idPropietario);
     }
 
-    public List<Cuarto> getCuartosByNombre(String nombreCuarto) {
-        return cuartoRepository.findByNombreCuarto(nombreCuarto);
-    }
-
-    public List<Cuarto> getCuartosByEstado(String estadoCuarto) {
-        return cuartoRepository.findByEstado(estadoCuarto);
-    }
-
-    public List<Cuarto> getCuartosAvailable() {
-        return cuartoRepository.findAvailable();
-    }
-
-    public List<Cuarto> getCuartosByDescripcionContaining(String texto) {
-        return cuartoRepository.findByDescripcionContaining(texto);
-    }
-
-    // Método para contar cuartos por propietario
-    public Long countCuartosByPropietario(Integer idPropietario) {
-        return cuartoRepository.countByPropietario(idPropietario);
-    }
-
-    // Método para cambiar el estado de un cuarto - CORREGIDO
+    // Método para cambiar el estado de un cuarto
     public Cuarto cambiarEstadoCuarto(Integer idCuarto, String nuevoEstado) {
         Optional<Cuarto> cuartoOpt = cuartoRepository.findById(idCuarto);
         if (cuartoOpt.isEmpty()) {
@@ -182,7 +145,7 @@ public class CuartoService {
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el cuarto actualizado"));
     }
 
-    // Método para actualizar el precio de un cuarto - CORREGIDO
+    // Método para actualizar el precio de un cuarto
     public Cuarto actualizarPrecioCuarto(Integer idCuarto, BigDecimal nuevoPrecio) {
         Optional<Cuarto> cuartoOpt = cuartoRepository.findById(idCuarto);
         if (cuartoOpt.isEmpty()) {
@@ -201,31 +164,5 @@ public class CuartoService {
         cuartoRepository.save(cuarto);
         return cuartoRepository.findById(idCuarto)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el cuarto actualizado"));
-    }
-
-    // Método para obtener cuartos con paginación (simplificado)
-    public List<Cuarto> getCuartosPaginados(int pagina, int tamaño) {
-        List<Cuarto> todosCuartos = cuartoRepository.findAll();
-        int inicio = Math.max(0, (pagina - 1) * tamaño);
-        int fin = Math.min(todosCuartos.size(), inicio + tamaño);
-        
-        if (inicio >= todosCuartos.size()) {
-            return List.of();
-        }
-        
-        return todosCuartos.subList(inicio, fin);
-    }
-
-    // Método para obtener cuartos por propietario con paginación (simplificado)
-    public List<Cuarto> getCuartosByPropietarioPaginados(Integer idPropietario, int pagina, int tamaño) {
-        List<Cuarto> cuartosPropietario = cuartoRepository.findByIdPropietario(idPropietario);
-        int inicio = Math.max(0, (pagina - 1) * tamaño);
-        int fin = Math.min(cuartosPropietario.size(), inicio + tamaño);
-        
-        if (inicio >= cuartosPropietario.size()) {
-            return List.of();
-        }
-        
-        return cuartosPropietario.subList(inicio, fin);
     }
 }
