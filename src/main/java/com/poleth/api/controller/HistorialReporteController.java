@@ -7,10 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.poleth.api.service.ReporteInquilinoService;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +19,7 @@ public class HistorialReporteController {
     private final HistorialReporteService historialReporteService;
     private final ObjectMapper objectMapper;
 
-    public HistorialReporteController(HistorialReporteService historialReporteService) {
+    public HistorialReporteController(HistorialReporteService historialReporteService, ReporteInquilinoService reporteInquilinoService) {
         this.historialReporteService = historialReporteService;
         this.objectMapper = createConfiguredObjectMapper();
     }
