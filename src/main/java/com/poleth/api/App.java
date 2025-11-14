@@ -108,7 +108,7 @@ public class App {
 
         NotificacionRepository notificacionRepo = new NotificacionRepository();
         NotificacionService notificacionService = new NotificacionService(notificacionRepo);
-        NotificacionController notificacionController = new NotificacionController(notificacionService);
+        NotificacionController notificacionController = new NotificacionController(notificacionService,inquilinoService);
         NotificacionRoutes notificacionRoutes = new NotificacionRoutes(notificacionController);
 
         // Registrar rutas
