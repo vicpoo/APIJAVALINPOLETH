@@ -98,4 +98,34 @@ public class ReporteInquilinoRepository {
             em.close();
         }
     }
+
+    // NUEVO MÉTODO: Obtener estadísticas de tipos de reportes para gráfica de barras
+    public List<Object[]> getEstadisticasTiposReportes() {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT ri.tipo, COUNT(ri) FROM ReporteInquilino ri " +
+                                    "WHERE ri.tipo IS NOT NULL " +
+                                    "GROUP BY ri.tipo " +
+                                    "ORDER BY COUNT(ri) DESC", Object[].class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método alternativo para estadísticas con tipos específicos
+    public List<Object[]> getEstadisticasTiposEspecificos() {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT ri.tipo, COUNT(ri) FROM ReporteInquilino ri " +
+                                    "WHERE ri.tipo IN ('Mantenimiento', 'Reparacion', 'Limpieza', 'Seguridad', 'Otro') " +
+                                    "GROUP BY ri.tipo " +
+                                    "ORDER BY COUNT(ri) DESC", Object[].class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
 }

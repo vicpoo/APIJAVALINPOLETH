@@ -22,5 +22,8 @@ public class ReporteInquilinoRoutes {
         // Rutas específicas que mencionaste
         app.get("/api/reportes-inquilinos/inquilino/{idInquilino}", reporteInquilinoController::getReportesByInquilino);
         app.get("/api/reportes-inquilinos/cuarto/{idCuarto}", reporteInquilinoController::getReportesByCuarto);
+
+        // NUEVA RUTA: Estadísticas para gráfica de barras
+        app.get("/api/reportes-inquilinos/estadisticas/tipos", reporteInquilinoController::getEstadisticasTiposReportes);
     }
 }

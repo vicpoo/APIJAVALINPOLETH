@@ -6,6 +6,9 @@ import com.poleth.api.repository.ReporteInquilinoRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class ReporteInquilinoService {
     private final ReporteInquilinoRepository reporteInquilinoRepository;
@@ -102,5 +105,78 @@ public class ReporteInquilinoService {
 
     public List<ReporteInquilino> getReportesByCuarto(Integer idCuarto) {
         return reporteInquilinoRepository.findByIdCuarto(idCuarto);
+    }
+
+    // NUEVO MÉTODO: Obtener estadísticas para gráfica de barras
+    public Map<String, Integer> getEstadisticasTiposReportes() {
+        List<Object[]> resultados = reporteInquilinoRepository.getEstadisticasTiposReportes();
+        Map<String, Integer> estadisticas = new LinkedHashMap<>();
+
+        // Inicializar con todos los tipos posibles en 0
+        String[] tiposEsperados = {"Mantenimiento", "Reparacion", "Limpieza", "Seguridad", "Otro"};
+        for (String tipo : tiposEsperados) {
+            estadisticas.put(tipo, 0);
+        }
+
+        // Llenar con los datos reales de la base de datos
+        for (Object[] resultado : resultados) {
+            String tipo = (String) resultado[0];
+            Long count = (Long) resultado[1];
+
+            if (tipo != null) {
+                // Normalizar el nombre del tipo
+                String tipoNormalizado = normalizarTipo(tipo);
+                estadisticas.put(tipoNormalizado, count.intValue());
+            }
+        }
+
+        return estadisticas;
+    }
+
+    // Método auxiliar para normalizar tipos
+    private String normalizarTipo(String tipo) {
+        if (tipo == null) return "Otro";
+
+        String tipoLower = tipo.toLowerCase().trim();
+        switch (tipoLower) {
+            case "mantenimiento":
+            case "mantenimientos":
+                return "Mantenimiento";
+            case "reparacion":
+            case "reparaciones":
+                return "Reparacion";
+            case "limpieza":
+            case "limpiezas":
+                return "Limpieza";
+            case "seguridad":
+                return "Seguridad";
+            case "otro":
+            case "otros":
+                return "Otro";
+            default:
+                return "Otro";
+        }
+    }
+
+    // Método alternativo para estadísticas más detalladas
+    public Map<String, Object> getEstadisticasCompletas() {
+        Map<String, Object> estadisticas = new HashMap<>();
+
+        // Obtener estadísticas de tipos
+        Map<String, Integer> tiposStats = getEstadisticasTiposReportes();
+        estadisticas.put("tiposReportes", tiposStats);
+
+        // Calcular total
+        int total = tiposStats.values().stream().mapToInt(Integer::intValue).sum();
+        estadisticas.put("totalReportes", total);
+
+        // Encontrar el tipo más común
+        String tipoMasComun = tiposStats.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("Ninguno");
+        estadisticas.put("tipoMasComun", tipoMasComun);
+
+        return estadisticas;
     }
 }

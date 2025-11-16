@@ -12,6 +12,7 @@ import io.javalin.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ReporteInquilinoController {
@@ -146,6 +147,21 @@ public class ReporteInquilinoController {
         }
     }
 
+    // NUEVO MÉTODO: Endpoint para estadísticas de gráfica de barras
+    public void getEstadisticasTiposReportes(Context ctx) {
+        try {
+            Map<String, Integer> estadisticas = reporteInquilinoService.getEstadisticasTiposReportes();
+
+            // Crear respuesta estructurada para la gráfica
+            EstadisticasResponse response = new EstadisticasResponse(estadisticas);
+
+            ctx.json(response);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener estadísticas de tipos de reportes: " + e.getMessage());
+        }
+    }
+
     // Método auxiliar para crear respuestas seguras
     private ReporteInquilinoResponse createSafeResponse(ReporteInquilino reporte) {
         return new ReporteInquilinoResponse(reporte);
@@ -171,6 +187,19 @@ public class ReporteInquilinoController {
             this.fecha = reporte.getFecha() != null ? reporte.getFecha().toString() : null;
             this.idCuarto = reporte.getIdCuarto();
             this.estadoReporte = reporte.getEstadoReporte();
+        }
+    }
+
+    // NUEVA CLASE: DTO para respuesta de estadísticas
+    public static class EstadisticasResponse {
+        public Map<String, Integer> datos;
+        public String mensaje;
+        public int total;
+
+        public EstadisticasResponse(Map<String, Integer> estadisticas) {
+            this.datos = estadisticas;
+            this.total = estadisticas.values().stream().mapToInt(Integer::intValue).sum();
+            this.mensaje = "Estadísticas de tipos de reportes obtenidas correctamente";
         }
     }
 }
