@@ -11,7 +11,7 @@
         <properties>
             <!-- Configuración de MySQL Database -->
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://98.88.171.234:3306/sistema_alquileres"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://98.95.151.71:3306/sistema_alquileres"/>
             <property name="jakarta.persistence.jdbc.user" value="polet"/>
             <property name="jakarta.persistence.jdbc.password" value="polet1234"/>
             
