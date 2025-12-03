@@ -8,44 +8,44 @@ import jakarta.persistence.*;
 public class Rol {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_rol")
-    private Integer idRol;
+    @Column(name = "id_roles") // Cambiado para coincidir con la BD
+    private Integer idRoles; // Cambiado el nombre del campo
 
-    @Column(name = "nombre_rol", nullable = false, unique = true, length = 50)
-    private String nombreRol;
+    @Column(name = "titulo", nullable = false, length = 50) // Cambiado a "titulo"
+    private String titulo; // Cambiado el nombre del campo
 
     // Constructor por defecto
     public Rol() {
     }
 
     // Constructor con parámetros
-    public Rol(String nombreRol) {
-        this.nombreRol = nombreRol;
+    public Rol(String titulo) {
+        this.titulo = titulo;
     }
 
     // Getters y Setters
-    public Integer getIdRol() {
-        return idRol;
+    public Integer getIdRoles() {
+        return idRoles;
     }
 
-    public void setIdRol(Integer idRol) {
-        this.idRol = idRol;
+    public void setIdRoles(Integer idRoles) {
+        this.idRoles = idRoles;
     }
 
-    public String getNombreRol() {
-        return nombreRol;
+    public String getTitulo() {
+        return titulo;
     }
 
-    public void setNombreRol(String nombreRol) {
-        this.nombreRol = nombreRol;
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
     }
 
     // toString para debugging
     @Override
     public String toString() {
         return "Rol{" +
-                "idRol=" + idRol +
-                ", nombreRol='" + nombreRol + '\'' +
+                "idRoles=" + idRoles +
+                ", titulo='" + titulo + '\'' +
                 '}';
     }
 }

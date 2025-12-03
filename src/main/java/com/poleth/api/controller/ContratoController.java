@@ -1,9 +1,10 @@
-//ContratoController.java
+// ContratoController.java
 package com.poleth.api.controller;
 
 import com.poleth.api.model.Contrato;
 import com.poleth.api.service.ContratoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -22,6 +23,10 @@ public class ContratoController {
         // Registrar el módulo para manejar LocalDate, LocalDateTime, etc.
         this.objectMapper.registerModule(new JavaTimeModule());
 
+        // CORRECCIÓN: Configurar ObjectMapper para manejar lazy loading
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
         // Esto es importante para que no serialice fechas como timestamps
         this.objectMapper.findAndRegisterModules();
     }
@@ -32,14 +37,21 @@ public class ContratoController {
             Contrato contrato = objectMapper.readValue(ctx.body(), Contrato.class);
 
             Contrato savedContrato = contratoService.createContrato(contrato);
+
+            // CORRECCIÓN: Serializar manualmente para control total
+            String jsonResponse = objectMapper.writeValueAsString(savedContrato);
             ctx.status(HttpStatus.CREATED)
-                    .json(savedContrato);
+                    .contentType("application/json")
+                    .result(jsonResponse);
         } catch (IllegalArgumentException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error al crear el contrato: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"" + e.getMessage().replace("\"", "\\\"") + "\"}");
         } catch (Exception e) {
+            e.printStackTrace(); // Para debugging
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error interno al crear el contrato: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"Error interno al crear el contrato: " + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -47,10 +59,16 @@ public class ContratoController {
     public void getAllContratos(Context ctx) {
         try {
             List<Contrato> contratos = contratoService.getAllContratos();
-            ctx.json(contratos);
+
+            // CORRECCIÓN: Serializar manualmente
+            String jsonResponse = objectMapper.writeValueAsString(contratos);
+            ctx.contentType("application/json")
+                    .result(jsonResponse);
         } catch (Exception e) {
+            e.printStackTrace(); // Para debugging
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener los contratos: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"Error al obtener los contratos: " + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -61,17 +79,23 @@ public class ContratoController {
             Optional<Contrato> contrato = contratoService.getContratoById(id);
 
             if (contrato.isPresent()) {
-                ctx.json(contrato.get());
+                String jsonResponse = objectMapper.writeValueAsString(contrato.get());
+                ctx.contentType("application/json")
+                        .result(jsonResponse);
             } else {
                 ctx.status(HttpStatus.NOT_FOUND)
-                        .json("Contrato no encontrado con ID: " + id);
+                        .contentType("application/json")
+                        .result("{\"error\": \"Contrato no encontrado con ID: " + id + "\"}");
             }
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de contrato inválido");
+                    .contentType("application/json")
+                    .result("{\"error\": \"ID de contrato inválido\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener el contrato: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"Error al obtener el contrato: " + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -80,13 +104,19 @@ public class ContratoController {
         try {
             Integer idCuarto = Integer.parseInt(ctx.pathParam("idCuarto"));
             List<Contrato> contratos = contratoService.getContratosByCuarto(idCuarto);
-            ctx.json(contratos);
+
+            String jsonResponse = objectMapper.writeValueAsString(contratos);
+            ctx.contentType("application/json")
+                    .result(jsonResponse);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de cuarto inválido");
+                    .contentType("application/json")
+                    .result("{\"error\": \"ID de cuarto inválido\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener contratos del cuarto: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"Error al obtener contratos del cuarto: " + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -95,13 +125,19 @@ public class ContratoController {
         try {
             Integer idInquilino = Integer.parseInt(ctx.pathParam("idInquilino"));
             List<Contrato> contratos = contratoService.getContratosByInquilino(idInquilino);
-            ctx.json(contratos);
+
+            String jsonResponse = objectMapper.writeValueAsString(contratos);
+            ctx.contentType("application/json")
+                    .result(jsonResponse);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de inquilino inválido");
+                    .contentType("application/json")
+                    .result("{\"error\": \"ID de inquilino inválido\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al obtener contratos del inquilino: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"Error al obtener contratos del inquilino: " + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -112,16 +148,23 @@ public class ContratoController {
             Contrato contratoActualizado = objectMapper.readValue(ctx.body(), Contrato.class);
 
             Contrato updatedContrato = contratoService.updateContrato(id, contratoActualizado);
-            ctx.json(updatedContrato);
+
+            String jsonResponse = objectMapper.writeValueAsString(updatedContrato);
+            ctx.contentType("application/json")
+                    .result(jsonResponse);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de contrato inválido");
+                    .contentType("application/json")
+                    .result("{\"error\": \"ID de contrato inválido\"}");
         } catch (IllegalArgumentException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("Error al actualizar el contrato: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"" + e.getMessage().replace("\"", "\\\"") + "\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error interno al actualizar el contrato: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"Error interno al actualizar el contrato: " + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 
@@ -132,7 +175,8 @@ public class ContratoController {
 
             if (!contratoService.existsById(id)) {
                 ctx.status(HttpStatus.NOT_FOUND)
-                        .json("Contrato no encontrado con ID: " + id);
+                        .contentType("application/json")
+                        .result("{\"error\": \"Contrato no encontrado con ID: " + id + "\"}");
                 return;
             }
 
@@ -140,10 +184,13 @@ public class ContratoController {
             ctx.status(HttpStatus.NO_CONTENT);
         } catch (NumberFormatException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json("ID de contrato inválido");
+                    .contentType("application/json")
+                    .result("{\"error\": \"ID de contrato inválido\"}");
         } catch (Exception e) {
+            e.printStackTrace();
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json("Error al eliminar el contrato: " + e.getMessage());
+                    .contentType("application/json")
+                    .result("{\"error\": \"Error al eliminar el contrato: " + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
 }

@@ -187,4 +187,60 @@ public class CatalogoMuebleController {
                     .json("Error interno al eliminar descripción: " + e.getMessage());
         }
     }
+
+    // PATCH: Cambiar estado del mueble
+    public void cambiarEstadoMueble(Context ctx) {
+        try {
+            Integer id = Integer.parseInt(ctx.pathParam("id"));
+            CambioEstadoRequest request = objectMapper.readValue(ctx.body(), CambioEstadoRequest.class);
+
+            CatalogoMueble catalogoMueble = catalogoMuebleService.cambiarEstadoMueble(id, request.getEstado());
+            ctx.json(catalogoMueble);
+        } catch (NumberFormatException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("ID de mueble inválido");
+        } catch (IllegalArgumentException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("Error al cambiar estado: " + e.getMessage());
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error interno al cambiar estado: " + e.getMessage());
+        }
+    }
+
+    // GET: Obtener muebles por estado
+    public void getCatalogoMueblesByEstado(Context ctx) {
+        try {
+            String estado = ctx.pathParam("estado");
+            List<CatalogoMueble> catalogoMuebles = catalogoMuebleService.getCatalogoMueblesByEstado(estado);
+            ctx.json(catalogoMuebles);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener muebles por estado: " + e.getMessage());
+        }
+    }
+
+    // GET: Obtener muebles activos
+    public void getCatalogoMueblesActivos(Context ctx) {
+        try {
+            List<CatalogoMueble> catalogoMuebles = catalogoMuebleService.getCatalogoMueblesActivos();
+            ctx.json(catalogoMuebles);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener muebles activos: " + e.getMessage());
+        }
+    }
+
+    // Clase interna para cambio de estado
+    private static class CambioEstadoRequest {
+        private String estado;
+
+        public String getEstado() {
+            return estado;
+        }
+
+        public void setEstado(String estado) {
+            this.estado = estado;
+        }
+    }
 }

@@ -19,6 +19,13 @@ public class MantenimientoRoutes {
         app.put("/api/mantenimientos/{id}", mantenimientoController::updateMantenimiento);
         app.delete("/api/mantenimientos/{id}", mantenimientoController::deleteMantenimiento);
 
+        // Rutas de búsqueda
+        app.get("/api/mantenimientos/cuarto/{idCuarto}", mantenimientoController::getMantenimientosByCuarto);
+        app.get("/api/mantenimientos/estado/{estado}", mantenimientoController::getMantenimientosByEstado);
+        app.get("/api/mantenimientos/pendientes", mantenimientoController::getMantenimientosPendientes);
+        app.get("/api/mantenimientos/completados", mantenimientoController::getMantenimientosCompletados);
+        app.get("/api/mantenimientos/fechas", mantenimientoController::getMantenimientosByFechaRange);
+
         // Rutas de gestión específicas
         app.patch("/api/mantenimientos/{id}/atender", mantenimientoController::atenderMantenimiento);
         app.patch("/api/mantenimientos/{id}/estado", mantenimientoController::actualizarEstadoMantenimiento);

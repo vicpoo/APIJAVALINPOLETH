@@ -9,7 +9,7 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,16 +91,55 @@ public class PagoController {
         }
     }
 
+    // GET: Obtener pagos por inquilino
+    public void getPagosByInquilino(Context ctx) {
+        try {
+            Integer idInquilino = Integer.parseInt(ctx.pathParam("idInquilino"));
+            List<Pago> pagos = pagoService.getPagosByInquilino(idInquilino);
+            ctx.json(pagos);
+        } catch (NumberFormatException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("ID de inquilino inválido");
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
     // GET: Obtener pagos por fecha específica
     public void getPagosByFecha(Context ctx) {
         try {
             String fechaStr = ctx.pathParam("fecha");
-            Date fecha = Date.valueOf(fechaStr);
+            LocalDate fecha = LocalDate.parse(fechaStr);
             List<Pago> pagos = pagoService.getPagosByFecha(fecha);
             ctx.json(pagos);
         } catch (IllegalArgumentException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
                     .json("Formato de fecha inválido. Use YYYY-MM-DD");
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
+    // GET: Obtener pagos por estado
+    public void getPagosByEstado(Context ctx) {
+        try {
+            String estado = ctx.pathParam("estado");
+            List<Pago> pagos = pagoService.getPagosByEstado(estado);
+            ctx.json(pagos);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener los pagos: " + e.getMessage());
+        }
+    }
+
+    // GET: Obtener pagos por método de pago
+    public void getPagosByMetodoPago(Context ctx) {
+        try {
+            String metodoPago = ctx.pathParam("metodoPago");
+            List<Pago> pagos = pagoService.getPagosByMetodoPago(metodoPago);
+            ctx.json(pagos);
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .json("Error al obtener los pagos: " + e.getMessage());
@@ -190,6 +229,49 @@ public class PagoController {
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .json("Error al obtener el pago: " + e.getMessage());
+        }
+    }
+
+    // PUT: Actualizar pago completo
+    public void updatePago(Context ctx) {
+        try {
+            Integer id = Integer.parseInt(ctx.pathParam("id"));
+            Pago pagoActualizado = objectMapper.readValue(ctx.body(), Pago.class);
+
+            Pago updatedPago = pagoService.updatePago(id, pagoActualizado);
+            ctx.json(updatedPago);
+        } catch (NumberFormatException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("ID de pago inválido");
+        } catch (IllegalArgumentException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("Error de validación: " + e.getMessage());
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al actualizar el pago: " + e.getMessage());
+        }
+    }
+
+    // PATCH: Cambiar estado del pago
+    public void cambiarEstadoPago(Context ctx) {
+        try {
+            Integer idPago = Integer.parseInt(ctx.pathParam("id"));
+            String body = ctx.body();
+
+            // Extraer nuevoEstado del cuerpo JSON
+            String nuevoEstado = objectMapper.readTree(body).get("estado_pago").asText();
+
+            Pago pago = pagoService.cambiarEstadoPago(idPago, nuevoEstado);
+            ctx.json(pago);
+        } catch (NumberFormatException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("ID de pago inválido");
+        } catch (IllegalArgumentException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("Error al cambiar estado: " + e.getMessage());
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error interno al cambiar estado: " + e.getMessage());
         }
     }
 

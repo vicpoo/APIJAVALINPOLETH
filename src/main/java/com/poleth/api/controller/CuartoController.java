@@ -113,7 +113,7 @@ public class CuartoController {
             String body = ctx.body();
 
             // Extraer nuevoEstado del cuerpo JSON
-            String nuevoEstado = objectMapper.readTree(body).get("estado").asText();
+            String nuevoEstado = objectMapper.readTree(body).get("estado_cuarto").asText();
 
             Cuarto cuarto = cuartoService.cambiarEstadoCuarto(idCuarto, nuevoEstado);
             ctx.json(cuarto);
@@ -136,7 +136,7 @@ public class CuartoController {
             String body = ctx.body();
 
             // Extraer nuevoPrecio del cuerpo JSON
-            BigDecimal nuevoPrecio = new BigDecimal(objectMapper.readTree(body).get("precio").asText());
+            BigDecimal nuevoPrecio = new BigDecimal(objectMapper.readTree(body).get("precio_alquiler").asText());
 
             Cuarto cuarto = cuartoService.actualizarPrecioCuarto(idCuarto, nuevoPrecio);
             ctx.json(cuarto);

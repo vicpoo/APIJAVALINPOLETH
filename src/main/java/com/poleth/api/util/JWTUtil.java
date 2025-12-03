@@ -1,6 +1,7 @@
+//JWTUtil.java
 package com.poleth.api.util;
 
-import com.poleth.api.model.Login;
+import com.poleth.api.model.Usuario;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
@@ -11,50 +12,31 @@ public class JWTUtil {
     private static final Key KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     private static final long EXPIRATION_TIME = 86400000; // 24 horas en milisegundos
 
-    public static String generarToken(Login login) {
+    public static String generarToken(Usuario usuario) {
         Date ahora = new Date();
         Date expiracion = new Date(ahora.getTime() + EXPIRATION_TIME);
 
         JwtBuilder builder = Jwts.builder()
-                .setSubject(login.getUsuario())
-                .claim("id", login.getIdLogin())
-                .claim("rol", login.getRol().getNombreRol())
-                .claim("rolId", login.getRol().getIdRol())
+                .setSubject(usuario.getUsername())
+                .claim("id", usuario.getIdUsuario())
+                .claim("rol", usuario.getRol().getTitulo())
+                .claim("rolId", usuario.getRol().getIdRoles())
+                .claim("email", usuario.getEmail())
                 .setIssuedAt(ahora)
                 .setExpiration(expiracion)
                 .signWith(KEY, SignatureAlgorithm.HS256);
 
-        // Agregar información de inquilino si existe
-        if (login.getInquilino() != null && login.getInquilino().getIdInquilino() != null) {
-            builder.claim("inquilinoId", login.getInquilino().getIdInquilino());
-            System.out.println("✅ Agregando inquilinoId al JWT: " + login.getInquilino().getIdInquilino());
-        }
-
-        // Agregar información de propietario si existe
-        if (login.getPropietario() != null && login.getPropietario().getIdPropietario() != null) {
-            builder.claim("propietarioId", login.getPropietario().getIdPropietario());
-            System.out.println("✅ Agregando propietarioId al JWT: " + login.getPropietario().getIdPropietario());
-        }
-
-        // Agregar información de invitado si existe
-        if (login.getInvitado() != null && login.getInvitado().getIdInvitado() != null) {
-            builder.claim("invitadoId", login.getInvitado().getIdInvitado());
-            System.out.println("✅ Agregando invitadoId al JWT: " + login.getInvitado().getIdInvitado());
-        }
-
         String token = builder.compact();
-        System.out.println("🔐 Token generado con claims adicionales");
+        System.out.println("🔐 Token generado para usuario: " + usuario.getUsername());
 
         // Debug: mostrar el contenido del token
         try {
             Claims claims = parseToken(token);
             System.out.println("📋 Contenido del JWT:");
             System.out.println("   - Usuario: " + claims.getSubject());
-            System.out.println("   - ID Login: " + claims.get("id"));
+            System.out.println("   - ID Usuario: " + claims.get("id"));
             System.out.println("   - Rol: " + claims.get("rol"));
-            System.out.println("   - InquilinoId: " + claims.get("inquilinoId"));
-            System.out.println("   - PropietarioId: " + claims.get("propietarioId"));
-            System.out.println("   - InvitadoId: " + claims.get("invitadoId"));
+            System.out.println("   - Email: " + claims.get("email"));
         } catch (Exception e) {
             System.err.println("❌ Error al parsear token para debug: " + e.getMessage());
         }
@@ -94,32 +76,9 @@ public class JWTUtil {
         return claims.get("rolId", Integer.class);
     }
 
-    // NUEVOS MÉTODOS PARA OBTENER INQUILINO Y PROPIETARIO
-    public static Integer obtenerInquilinoIdDesdeToken(String token) {
-        try {
-            Claims claims = parseToken(token);
-            return claims.get("inquilinoId", Integer.class);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public static Integer obtenerPropietarioIdDesdeToken(String token) {
-        try {
-            Claims claims = parseToken(token);
-            return claims.get("propietarioId", Integer.class);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public static Integer obtenerInvitadoIdDesdeToken(String token) {
-        try {
-            Claims claims = parseToken(token);
-            return claims.get("invitadoId", Integer.class);
-        } catch (Exception e) {
-            return null;
-        }
+    public static String obtenerEmailDesdeToken(String token) {
+        Claims claims = parseToken(token);
+        return claims.get("email", String.class);
     }
 
     // Método auxiliar para parsear el token

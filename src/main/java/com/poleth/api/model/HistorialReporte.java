@@ -24,35 +24,19 @@ public class HistorialReporte {
     @Column(name = "descripcion_hist", columnDefinition = "TEXT")
     private String descripcionHist;
 
-    @Column(name = "fecha_registro")
+    @Column(name = "fecha_registro", insertable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 
     @Column(name = "usuario_registro", length = 50)
     private String usuarioRegistro;
 
-    // Relación Many-to-One con ReporteInquilino - Cambiado a EAGER
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_reporte", insertable = false, updatable = false)
-    private ReporteInquilino reporte;
-
     // Constructor por defecto
     public HistorialReporte() {
-        this.fechaRegistro = LocalDateTime.now();
     }
 
     // Constructor con parámetros básicos
-    public HistorialReporte(Integer idReporte, String nombreReporteHist, String tipoReporteHist, String descripcionHist) {
-        this();
-        this.idReporte = idReporte;
-        this.nombreReporteHist = nombreReporteHist;
-        this.tipoReporteHist = tipoReporteHist;
-        this.descripcionHist = descripcionHist;
-    }
-
-    // Constructor completo
-    public HistorialReporte(Integer idReporte, String nombreReporteHist, String tipoReporteHist, 
-                           String descripcionHist, String usuarioRegistro) {
-        this();
+    public HistorialReporte(Integer idReporte, String nombreReporteHist, String tipoReporteHist,
+                            String descripcionHist, String usuarioRegistro) {
         this.idReporte = idReporte;
         this.nombreReporteHist = nombreReporteHist;
         this.tipoReporteHist = tipoReporteHist;
@@ -60,9 +44,9 @@ public class HistorialReporte {
         this.usuarioRegistro = usuarioRegistro;
     }
 
-    // Constructor con fecha personalizada
-    public HistorialReporte(Integer idReporte, String nombreReporteHist, String tipoReporteHist, 
-                           String descripcionHist, LocalDateTime fechaRegistro, String usuarioRegistro) {
+    // Constructor completo
+    public HistorialReporte(Integer idReporte, String nombreReporteHist, String tipoReporteHist,
+                            String descripcionHist, LocalDateTime fechaRegistro, String usuarioRegistro) {
         this.idReporte = idReporte;
         this.nombreReporteHist = nombreReporteHist;
         this.tipoReporteHist = tipoReporteHist;
@@ -128,15 +112,29 @@ public class HistorialReporte {
         this.usuarioRegistro = usuarioRegistro;
     }
 
-    public ReporteInquilino getReporte() {
-        return reporte;
+    // Métodos utilitarios
+    public boolean tieneUsuarioRegistro() {
+        return usuarioRegistro != null && !usuarioRegistro.trim().isEmpty();
     }
 
-    public void setReporte(ReporteInquilino reporte) {
-        this.reporte = reporte;
+    public boolean esHistorialReciente() {
+        if (fechaRegistro == null) return false;
+        LocalDateTime unaSemanaAtras = LocalDateTime.now().minusDays(7);
+        return fechaRegistro.isAfter(unaSemanaAtras);
     }
 
-    // toString para debugging (sin relaciones para evitar problemas)
+    public boolean esHistorialDelDia() {
+        if (fechaRegistro == null) return false;
+        LocalDateTime hoy = LocalDateTime.now();
+        return fechaRegistro.toLocalDate().equals(hoy.toLocalDate());
+    }
+
+    public boolean contieneTextoEnDescripcion(String texto) {
+        if (descripcionHist == null || texto == null) return false;
+        return descripcionHist.toLowerCase().contains(texto.toLowerCase());
+    }
+
+    // toString para debugging
     @Override
     public String toString() {
         return "HistorialReporte{" +
@@ -144,36 +142,57 @@ public class HistorialReporte {
                 ", idReporte=" + idReporte +
                 ", nombreReporteHist='" + nombreReporteHist + '\'' +
                 ", tipoReporteHist='" + tipoReporteHist + '\'' +
-                ", descripcionHist='" + (descripcionHist != null ? descripcionHist.substring(0, Math.min(50, descripcionHist.length())) + "..." : "null") + '\'' +
+                ", descripcionHist='" + (descripcionHist != null ?
+                descripcionHist.substring(0, Math.min(50, descripcionHist.length())) : "null") + "'" +
                 ", fechaRegistro=" + fechaRegistro +
                 ", usuarioRegistro='" + usuarioRegistro + '\'' +
                 '}';
     }
 
-    // Método para crear un historial a partir de un reporte
-    public static HistorialReporte fromReporteInquilino(ReporteInquilino reporte, String usuarioRegistro) {
+    // Método estático para crear historial a partir de reporte
+    public static HistorialReporte crearDesdeReporte(ReporteInquilino reporte, String usuario) {
         return new HistorialReporte(
-            reporte.getIdReporte(),
-            reporte.getNombre(),
-            reporte.getTipo(),
-            reporte.getDescripcion(),
-            usuarioRegistro
+                reporte.getIdReporte(),
+                reporte.getNombre(),
+                reporte.getTipo(),
+                reporte.getDescripcion(),
+                usuario
         );
     }
 
-    // Método para crear un historial con acciones específicas
-    public static HistorialReporte createWithAction(ReporteInquilino reporte, String accion, String usuarioRegistro) {
-        String descripcion = String.format("Acción realizada: %s. Reporte: %s", 
-            accion, 
-            reporte.getDescripcion() != null ? reporte.getDescripcion() : "Sin descripción"
+    // Método para crear historial con acción específica
+    public static HistorialReporte crearConAccion(ReporteInquilino reporte, String accion,
+                                                  String detalles, String usuario) {
+        String descripcionCompleta = String.format("Acción: %s\nDetalles: %s\nReporte original: %s",
+                accion,
+                detalles != null ? detalles : "Sin detalles adicionales",
+                reporte.getDescripcion() != null ? reporte.getDescripcion() : "Sin descripción"
         );
-        
+
         return new HistorialReporte(
-            reporte.getIdReporte(),
-            reporte.getNombre(),
-            reporte.getTipo(),
-            descripcion,
-            usuarioRegistro
+                reporte.getIdReporte(),
+                reporte.getNombre(),
+                reporte.getTipo(),
+                descripcionCompleta,
+                usuario
+        );
+    }
+
+    // Método para crear historial de cierre
+    public static HistorialReporte crearHistorialCierre(ReporteInquilino reporte,
+                                                        String accionesTomadas, String usuario) {
+        String descripcion = String.format("REPORTE CERRADO\nAcciones tomadas: %s\nEstado anterior: %s\nFecha de cierre: %s",
+                accionesTomadas,
+                reporte.getEstadoReporte(),
+                reporte.getFechaCierre() != null ? reporte.getFechaCierre().toString() : "No especificada"
+        );
+
+        return new HistorialReporte(
+                reporte.getIdReporte(),
+                reporte.getNombre() + " (CERRADO)",
+                reporte.getTipo(),
+                descripcion,
+                usuario
         );
     }
 }

@@ -3,6 +3,9 @@ package com.poleth.api.model;
 
 import jakarta.persistence.*;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notificaciones")
@@ -12,11 +15,11 @@ public class Notificacion {
     @Column(name = "id_notificacion")
     private Integer idNotificacion;
 
-    @ManyToOne
-    @JoinColumn(name = "id_inquilino")
-    private Inquilino inquilino;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_inquilino", referencedColumnName = "id_usuario", nullable = false)
+    private Usuario inquilino; // Cambiado de Inquilino a Usuario
 
-    @Column(name = "id_contrato")
+    @Column(name = "id_contrato", nullable = false)
     private Integer idContrato;
 
     @Column(name = "fecha_utilizacion")
@@ -25,30 +28,46 @@ public class Notificacion {
     @Column(name = "tipo_notificacion", length = 50)
     private String tipoNotificacion;
 
+    @Column(name = "detalles", columnDefinition = "TEXT")
+    private String detalles;
+
+    @Column(name = "estado_notificacion", length = 20)
+    private String estadoNotificacion = "no_leido";
+
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
+
     // Constructor por defecto
     public Notificacion() {
+        this.createdAt = Timestamp.valueOf(LocalDateTime.now());
     }
 
-    // Constructor con parámetros básicos
-    public Notificacion(Inquilino inquilino, Integer idContrato, Date fechaUtilizacion, String tipoNotificacion) {
+    // Constructor con parámetros
+    public Notificacion(Usuario inquilino, Integer idContrato, Date fechaUtilizacion,
+                        String tipoNotificacion, String detalles) {
+        this();
         this.inquilino = inquilino;
         this.idContrato = idContrato;
         this.fechaUtilizacion = fechaUtilizacion;
         this.tipoNotificacion = tipoNotificacion;
+        this.detalles = detalles;
     }
 
-    // Constructor sin inquilino
-    public Notificacion(Integer idContrato, Date fechaUtilizacion, String tipoNotificacion) {
-        this.idContrato = idContrato;
-        this.fechaUtilizacion = fechaUtilizacion;
-        this.tipoNotificacion = tipoNotificacion;
+    // Constructor completo
+    public Notificacion(Usuario inquilino, Integer idContrato, Date fechaUtilizacion,
+                        String tipoNotificacion, String detalles, String estadoNotificacion) {
+        this(inquilino, idContrato, fechaUtilizacion, tipoNotificacion, detalles);
+        this.estadoNotificacion = estadoNotificacion != null ? estadoNotificacion : "no_leido";
     }
 
-    // Constructor sin contrato
-    public Notificacion(Inquilino inquilino, Date fechaUtilizacion, String tipoNotificacion) {
-        this.inquilino = inquilino;
-        this.fechaUtilizacion = fechaUtilizacion;
-        this.tipoNotificacion = tipoNotificacion;
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = Timestamp.valueOf(LocalDateTime.now());
+        }
+        if (estadoNotificacion == null) {
+            estadoNotificacion = "no_leido";
+        }
     }
 
     // Getters y Setters
@@ -60,11 +79,11 @@ public class Notificacion {
         this.idNotificacion = idNotificacion;
     }
 
-    public Inquilino getInquilino() {
+    public Usuario getInquilino() {
         return inquilino;
     }
 
-    public void setInquilino(Inquilino inquilino) {
+    public void setInquilino(Usuario inquilino) {
         this.inquilino = inquilino;
     }
 
@@ -92,6 +111,30 @@ public class Notificacion {
         this.tipoNotificacion = tipoNotificacion;
     }
 
+    public String getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(String detalles) {
+        this.detalles = detalles;
+    }
+
+    public String getEstadoNotificacion() {
+        return estadoNotificacion;
+    }
+
+    public void setEstadoNotificacion(String estadoNotificacion) {
+        this.estadoNotificacion = estadoNotificacion;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
     // Métodos utilitarios
     public boolean tieneInquilino() {
         return inquilino != null;
@@ -101,41 +144,49 @@ public class Notificacion {
         return idContrato != null;
     }
 
-    public boolean esParaInquilino() {
-        return tieneInquilino();
+    public boolean esEstadoLeido() {
+        return "leido".equalsIgnoreCase(estadoNotificacion);
     }
 
-    public boolean esParaContrato() {
-        return tieneContrato();
+    public boolean esEstadoNoLeido() {
+        return "no_leido".equalsIgnoreCase(estadoNotificacion);
+    }
+
+    public void marcarComoLeido() {
+        this.estadoNotificacion = "leido";
+    }
+
+    public void marcarComoNoLeido() {
+        this.estadoNotificacion = "no_leido";
     }
 
     public boolean esFechaUtilizacionPasada() {
         if (fechaUtilizacion == null) {
             return false;
         }
-        Date hoy = new Date(System.currentTimeMillis());
-        return fechaUtilizacion.before(hoy);
+        LocalDate hoy = LocalDate.now();
+        return fechaUtilizacion.toLocalDate().isBefore(hoy);
     }
 
     public boolean esFechaUtilizacionFutura() {
         if (fechaUtilizacion == null) {
             return false;
         }
-        Date hoy = new Date(System.currentTimeMillis());
-        return fechaUtilizacion.after(hoy);
+        LocalDate hoy = LocalDate.now();
+        return fechaUtilizacion.toLocalDate().isAfter(hoy);
     }
 
     public boolean esFechaUtilizacionHoy() {
         if (fechaUtilizacion == null) {
             return false;
         }
-        Date hoy = new Date(System.currentTimeMillis());
-        return fechaUtilizacion.equals(hoy);
+        LocalDate hoy = LocalDate.now();
+        return fechaUtilizacion.toLocalDate().isEqual(hoy);
     }
 
     // Método para obtener el ID del inquilino de forma segura
     public Integer getIdInquilino() {
-        return tieneInquilino() ? inquilino.getIdInquilino() : null;
+        return tieneInquilino() ? inquilino.getIdUsuario() : null;
     }
 
     // toString para debugging
@@ -143,10 +194,12 @@ public class Notificacion {
     public String toString() {
         return "Notificacion{" +
                 "idNotificacion=" + idNotificacion +
-                ", inquilino=" + (tieneInquilino() ? inquilino.getIdInquilino() : "null") +
+                ", inquilino=" + (tieneInquilino() ? inquilino.getIdUsuario() : "null") +
                 ", idContrato=" + idContrato +
                 ", fechaUtilizacion=" + fechaUtilizacion +
                 ", tipoNotificacion='" + tipoNotificacion + '\'' +
+                ", estadoNotificacion='" + estadoNotificacion + '\'' +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

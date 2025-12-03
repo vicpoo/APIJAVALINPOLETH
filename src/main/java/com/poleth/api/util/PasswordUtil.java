@@ -1,9 +1,9 @@
+//PasswordUtil.java
 package com.poleth.api.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 
 public class PasswordUtil {
-
 
     public static String hashPassword(String plainPassword) {
         if (plainPassword == null || plainPassword.trim().isEmpty()) {

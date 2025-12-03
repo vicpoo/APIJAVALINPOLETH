@@ -20,13 +20,46 @@ public class MantenimientoController {
     public MantenimientoController(MantenimientoService mantenimientoService) {
         this.mantenimientoService = mantenimientoService;
         this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule()); // Registrar módulo Java Time
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     // POST: Crear nuevo mantenimiento
     public void createMantenimiento(Context ctx) {
         try {
-            Mantenimiento mantenimiento = objectMapper.readValue(ctx.body(), Mantenimiento.class);
+            // Leer JSON y mapear a objeto
+            String requestBody = ctx.body();
+            Mantenimiento mantenimiento = objectMapper.readValue(requestBody, Mantenimiento.class);
+
+            // Validar campos requeridos
+            if (mantenimiento.getIdCuarto() == null) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo idCuarto es requerido");
+                return;
+            }
+
+            if (mantenimiento.getFechaReporte() == null) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo fechaReporte es requerido");
+                return;
+            }
+
+            if (mantenimiento.getDescripcionProblema() == null ||
+                    mantenimiento.getDescripcionProblema().trim().isEmpty()) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo descripcionProblema es requerido");
+                return;
+            }
+
+            // Estado por defecto si no se especifica
+            if (mantenimiento.getEstadoMantenimiento() == null ||
+                    mantenimiento.getEstadoMantenimiento().trim().isEmpty()) {
+                mantenimiento.setEstadoMantenimiento("pendiente");
+            }
+
+            // Costo por defecto si no se especifica
+            if (mantenimiento.getCostoMantenimiento() == null) {
+                mantenimiento.setCostoMantenimiento(BigDecimal.ZERO);
+            }
 
             Mantenimiento savedMantenimiento = mantenimientoService.createMantenimiento(mantenimiento);
             ctx.status(HttpStatus.CREATED)
@@ -72,11 +105,94 @@ public class MantenimientoController {
         }
     }
 
+    // GET: Obtener mantenimientos por cuarto
+    public void getMantenimientosByCuarto(Context ctx) {
+        try {
+            Integer idCuarto = Integer.parseInt(ctx.pathParam("idCuarto"));
+            List<Mantenimiento> mantenimientos = mantenimientoService.getMantenimientosByCuarto(idCuarto);
+            ctx.json(mantenimientos);
+        } catch (NumberFormatException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("ID de cuarto inválido");
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener los mantenimientos: " + e.getMessage());
+        }
+    }
+
+    // GET: Obtener mantenimientos por estado
+    public void getMantenimientosByEstado(Context ctx) {
+        try {
+            String estado = ctx.pathParam("estado");
+            List<Mantenimiento> mantenimientos = mantenimientoService.getMantenimientosByEstado(estado);
+            ctx.json(mantenimientos);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener los mantenimientos: " + e.getMessage());
+        }
+    }
+
+    // GET: Obtener mantenimientos pendientes
+    public void getMantenimientosPendientes(Context ctx) {
+        try {
+            List<Mantenimiento> mantenimientos = mantenimientoService.getMantenimientosPendientes();
+            ctx.json(mantenimientos);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener los mantenimientos pendientes: " + e.getMessage());
+        }
+    }
+
+    // GET: Obtener mantenimientos completados
+    public void getMantenimientosCompletados(Context ctx) {
+        try {
+            List<Mantenimiento> mantenimientos = mantenimientoService.getMantenimientosCompletados();
+            ctx.json(mantenimientos);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json("Error al obtener los mantenimientos completados: " + e.getMessage());
+        }
+    }
+
+    // GET: Buscar mantenimientos por rango de fechas
+    public void getMantenimientosByFechaRange(Context ctx) {
+        try {
+            LocalDate fechaInicio = LocalDate.parse(ctx.queryParam("fechaInicio"));
+            LocalDate fechaFin = LocalDate.parse(ctx.queryParam("fechaFin"));
+            List<Mantenimiento> mantenimientos = mantenimientoService.getMantenimientosByFechaReporteBetween(fechaInicio, fechaFin);
+            ctx.json(mantenimientos);
+        } catch (Exception e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json("Error en los parámetros de fecha. Use formato YYYY-MM-DD");
+        }
+    }
+
     // PUT: Actualizar mantenimiento completo
     public void updateMantenimiento(Context ctx) {
         try {
             Integer id = Integer.parseInt(ctx.pathParam("id"));
-            Mantenimiento mantenimientoActualizado = objectMapper.readValue(ctx.body(), Mantenimiento.class);
+            String requestBody = ctx.body();
+            Mantenimiento mantenimientoActualizado = objectMapper.readValue(requestBody, Mantenimiento.class);
+
+            // Validar campos requeridos
+            if (mantenimientoActualizado.getIdCuarto() == null) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo idCuarto es requerido");
+                return;
+            }
+
+            if (mantenimientoActualizado.getFechaReporte() == null) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo fechaReporte es requerido");
+                return;
+            }
+
+            if (mantenimientoActualizado.getDescripcionProblema() == null ||
+                    mantenimientoActualizado.getDescripcionProblema().trim().isEmpty()) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo descripcionProblema es requerido");
+                return;
+            }
 
             Mantenimiento updatedMantenimiento = mantenimientoService.updateMantenimiento(id, mantenimientoActualizado);
             ctx.json(updatedMantenimiento);
@@ -96,7 +212,17 @@ public class MantenimientoController {
     public void atenderMantenimiento(Context ctx) {
         try {
             Integer idMantenimiento = Integer.parseInt(ctx.pathParam("id"));
-            AtenderMantenimientoRequest request = objectMapper.readValue(ctx.body(), AtenderMantenimientoRequest.class);
+            String requestBody = ctx.body();
+
+            // Parsear request body manualmente
+            AtenderMantenimientoRequest request = objectMapper.readValue(requestBody, AtenderMantenimientoRequest.class);
+
+            // Validar campos requeridos
+            if (request.getFechaAtencion() == null) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo fechaAtencion es requerido");
+                return;
+            }
 
             Mantenimiento mantenimiento = mantenimientoService.atenderMantenimiento(
                     idMantenimiento,
@@ -121,7 +247,15 @@ public class MantenimientoController {
     public void actualizarEstadoMantenimiento(Context ctx) {
         try {
             Integer idMantenimiento = Integer.parseInt(ctx.pathParam("id"));
-            EstadoMantenimientoRequest request = objectMapper.readValue(ctx.body(), EstadoMantenimientoRequest.class);
+            String requestBody = ctx.body();
+            EstadoMantenimientoRequest request = objectMapper.readValue(requestBody, EstadoMantenimientoRequest.class);
+
+            // Validar campo requerido
+            if (request.getEstado() == null || request.getEstado().trim().isEmpty()) {
+                ctx.status(HttpStatus.BAD_REQUEST)
+                        .json("El campo estado es requerido");
+                return;
+            }
 
             Mantenimiento mantenimiento = mantenimientoService.actualizarEstadoMantenimiento(idMantenimiento, request.getEstado());
             ctx.json(mantenimiento);

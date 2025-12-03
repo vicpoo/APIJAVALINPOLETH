@@ -23,18 +23,13 @@ public class Mantenimiento {
     private String descripcionProblema;
 
     @Column(name = "estado_mantenimiento", length = 50)
-    private String estadoMantenimiento;
+    private String estadoMantenimiento = "pendiente";
 
     @Column(name = "fecha_atencion")
     private LocalDate fechaAtencion;
 
     @Column(name = "costo_mantenimiento", precision = 10, scale = 2)
-    private BigDecimal costoMantenimiento;
-
-    // Relación Many-to-One con Cuarto (opcional)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_cuarto", insertable = false, updatable = false)
-    private Cuarto cuarto;
+    private BigDecimal costoMantenimiento = BigDecimal.ZERO;
 
     // Constructor por defecto
     public Mantenimiento() {
@@ -49,7 +44,7 @@ public class Mantenimiento {
 
     // Constructor completo
     public Mantenimiento(Integer idCuarto, LocalDate fechaReporte, String descripcionProblema,
-                        String estadoMantenimiento, LocalDate fechaAtencion, BigDecimal costoMantenimiento) {
+                         String estadoMantenimiento, LocalDate fechaAtencion, BigDecimal costoMantenimiento) {
         this.idCuarto = idCuarto;
         this.fechaReporte = fechaReporte;
         this.descripcionProblema = descripcionProblema;
@@ -115,12 +110,30 @@ public class Mantenimiento {
         this.costoMantenimiento = costoMantenimiento;
     }
 
-    public Cuarto getCuarto() {
-        return cuarto;
+    // Métodos utilitarios
+    public boolean estaPendiente() {
+        return "pendiente".equalsIgnoreCase(estadoMantenimiento);
     }
 
-    public void setCuarto(Cuarto cuarto) {
-        this.cuarto = cuarto;
+    public boolean estaCompletado() {
+        return "completado".equalsIgnoreCase(estadoMantenimiento) ||
+                "resuelto".equalsIgnoreCase(estadoMantenimiento);
+    }
+
+    public boolean tieneFechaAtencion() {
+        return fechaAtencion != null;
+    }
+
+    public boolean tieneCosto() {
+        return costoMantenimiento != null && costoMantenimiento.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    public boolean esMantenimientoUrgente() {
+        if (descripcionProblema == null) return false;
+        String descripcion = descripcionProblema.toLowerCase();
+        return descripcion.contains("urgente") ||
+                descripcion.contains("emergencia") ||
+                descripcion.contains("grave");
     }
 
     // toString para debugging
@@ -130,7 +143,8 @@ public class Mantenimiento {
                 "idMantenimiento=" + idMantenimiento +
                 ", idCuarto=" + idCuarto +
                 ", fechaReporte=" + fechaReporte +
-                ", descripcionProblema='" + (descripcionProblema != null ? descripcionProblema.substring(0, Math.min(50, descripcionProblema.length())) + "..." : "null") + '\'' +
+                ", descripcionProblema='" + (descripcionProblema != null ?
+                descripcionProblema.substring(0, Math.min(50, descripcionProblema.length())) : "null") + "'" +
                 ", estadoMantenimiento='" + estadoMantenimiento + '\'' +
                 ", fechaAtencion=" + fechaAtencion +
                 ", costoMantenimiento=" + costoMantenimiento +

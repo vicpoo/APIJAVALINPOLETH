@@ -14,6 +14,10 @@ public class CatalogoMuebleService {
     }
 
     // Métodos CRUD básicos
+    public CatalogoMueble saveCatalogoMueble(CatalogoMueble catalogoMueble) {
+        return catalogoMuebleRepository.save(catalogoMueble);
+    }
+
     public List<CatalogoMueble> getAllCatalogoMuebles() {
         return catalogoMuebleRepository.findAll();
     }
@@ -38,9 +42,18 @@ public class CatalogoMuebleService {
             throw new IllegalArgumentException("El nombre del mueble no puede exceder 100 caracteres");
         }
 
+        if (catalogoMueble.getEstadoMueble() != null && catalogoMueble.getEstadoMueble().length() > 20) {
+            throw new IllegalArgumentException("El estado del mueble no puede exceder 20 caracteres");
+        }
+
         // Verificar si el nombre del mueble ya existe
         if (catalogoMuebleRepository.existsByNombreMueble(catalogoMueble.getNombreMueble())) {
             throw new IllegalArgumentException("El mueble '" + catalogoMueble.getNombreMueble() + "' ya existe en el catálogo");
+        }
+
+        // Establecer estado por defecto si no se proporciona
+        if (catalogoMueble.getEstadoMueble() == null) {
+            catalogoMueble.setEstadoMueble("activo");
         }
 
         // Guardar el mueble
@@ -57,6 +70,10 @@ public class CatalogoMuebleService {
         // Validar longitud de campos
         if (catalogoMuebleActualizado.getNombreMueble().length() > 100) {
             throw new IllegalArgumentException("El nombre del mueble no puede exceder 100 caracteres");
+        }
+
+        if (catalogoMuebleActualizado.getEstadoMueble() != null && catalogoMuebleActualizado.getEstadoMueble().length() > 20) {
+            throw new IllegalArgumentException("El estado del mueble no puede exceder 20 caracteres");
         }
 
         // Buscar el mueble existente
@@ -76,6 +93,7 @@ public class CatalogoMuebleService {
         // Actualizar los campos
         muebleExistente.setNombreMueble(catalogoMuebleActualizado.getNombreMueble());
         muebleExistente.setDescripcion(catalogoMuebleActualizado.getDescripcion());
+        muebleExistente.setEstadoMueble(catalogoMuebleActualizado.getEstadoMueble());
 
         // Guardar los cambios
         return catalogoMuebleRepository.save(muebleExistente);
@@ -110,5 +128,38 @@ public class CatalogoMuebleService {
         mueble.setDescripcion(null);
 
         return catalogoMuebleRepository.save(mueble);
+    }
+
+    // Método para cambiar el estado de un mueble
+    public CatalogoMueble cambiarEstadoMueble(Integer id, String nuevoEstado) {
+        Optional<CatalogoMueble> muebleOpt = catalogoMuebleRepository.findById(id);
+        if (muebleOpt.isEmpty()) {
+            throw new IllegalArgumentException("Mueble no encontrado en el catálogo con ID: " + id);
+        }
+
+        CatalogoMueble mueble = muebleOpt.get();
+        mueble.setEstadoMueble(nuevoEstado);
+
+        return catalogoMuebleRepository.save(mueble);
+    }
+
+    // Método para obtener muebles por estado
+    public List<CatalogoMueble> getCatalogoMueblesByEstado(String estado) {
+        return catalogoMuebleRepository.findByEstado(estado);
+    }
+
+    // Método para obtener muebles activos
+    public List<CatalogoMueble> getCatalogoMueblesActivos() {
+        return catalogoMuebleRepository.findActivos();
+    }
+
+    // Método para obtener muebles con descripción
+    public List<CatalogoMueble> getCatalogoMueblesConDescripcion() {
+        return catalogoMuebleRepository.findWithDescripcion();
+    }
+
+    // Método para obtener muebles sin descripción
+    public List<CatalogoMueble> getCatalogoMueblesSinDescripcion() {
+        return catalogoMuebleRepository.findWithoutDescripcion();
     }
 }

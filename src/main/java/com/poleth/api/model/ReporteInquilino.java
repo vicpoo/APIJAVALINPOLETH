@@ -27,11 +27,11 @@ public class ReporteInquilino {
     @Column(name = "fecha")
     private LocalDate fecha;
 
-    @Column(name = "id_cuarto")
+    @Column(name = "id_cuarto", nullable = false)
     private Integer idCuarto;
 
     @Column(name = "estado_reporte", length = 50)
-    private String estadoReporte;
+    private String estadoReporte = "abierto";
 
     @Column(name = "fecha_cierre")
     private LocalDate fechaCierre;
@@ -39,32 +39,25 @@ public class ReporteInquilino {
     @Column(name = "acciones_tomadas", columnDefinition = "TEXT")
     private String accionesTomadas;
 
-    // Relaciones Many-to-One (opcionales) - Cambiadas a EAGER para evitar problemas de Lazy Loading
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_inquilino", insertable = false, updatable = false)
-    private Inquilino inquilino;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_cuarto", insertable = false, updatable = false)
-    private Cuarto cuarto;
-
     // Constructor por defecto
     public ReporteInquilino() {
     }
 
     // Constructor con parámetros básicos
-    public ReporteInquilino(Integer idInquilino, String nombre, String tipo, String descripcion, LocalDate fecha) {
+    public ReporteInquilino(Integer idInquilino, String nombre, String tipo, String descripcion,
+                            LocalDate fecha, Integer idCuarto) {
         this.idInquilino = idInquilino;
         this.nombre = nombre;
         this.tipo = tipo;
         this.descripcion = descripcion;
         this.fecha = fecha;
+        this.idCuarto = idCuarto;
     }
 
     // Constructor completo
-    public ReporteInquilino(Integer idInquilino, String nombre, String tipo, String descripcion, 
-                           LocalDate fecha, Integer idCuarto, String estadoReporte, 
-                           LocalDate fechaCierre, String accionesTomadas) {
+    public ReporteInquilino(Integer idInquilino, String nombre, String tipo, String descripcion,
+                            LocalDate fecha, Integer idCuarto, String estadoReporte,
+                            LocalDate fechaCierre, String accionesTomadas) {
         this.idInquilino = idInquilino;
         this.nombre = nombre;
         this.tipo = tipo;
@@ -157,23 +150,42 @@ public class ReporteInquilino {
         this.accionesTomadas = accionesTomadas;
     }
 
-    public Inquilino getInquilino() {
-        return inquilino;
+    // Métodos utilitarios
+    public boolean estaAbierto() {
+        return "abierto".equalsIgnoreCase(estadoReporte);
     }
 
-    public void setInquilino(Inquilino inquilino) {
-        this.inquilino = inquilino;
+    public boolean estaCerrado() {
+        return "cerrado".equalsIgnoreCase(estadoReporte) ||
+                "resuelto".equalsIgnoreCase(estadoReporte) ||
+                "completado".equalsIgnoreCase(estadoReporte);
     }
 
-    public Cuarto getCuarto() {
-        return cuarto;
+    public boolean tieneFechaCierre() {
+        return fechaCierre != null;
     }
 
-    public void setCuarto(Cuarto cuarto) {
-        this.cuarto = cuarto;
+    public boolean tieneAccionesTomadas() {
+        return accionesTomadas != null && !accionesTomadas.trim().isEmpty();
     }
 
-    // toString para debugging (sin relaciones para evitar problemas)
+    public boolean esReporteUrgente() {
+        if (descripcion == null) return false;
+        String descripcionLower = descripcion.toLowerCase();
+        return descripcionLower.contains("urgente") ||
+                descripcionLower.contains("emergencia") ||
+                descripcionLower.contains("inmediato");
+    }
+
+    public void cerrarReporte(String acciones) {
+        this.estadoReporte = "cerrado";
+        this.fechaCierre = LocalDate.now();
+        if (acciones != null && !acciones.trim().isEmpty()) {
+            this.accionesTomadas = acciones;
+        }
+    }
+
+    // toString para debugging
     @Override
     public String toString() {
         return "ReporteInquilino{" +
@@ -181,12 +193,14 @@ public class ReporteInquilino {
                 ", idInquilino=" + idInquilino +
                 ", nombre='" + nombre + '\'' +
                 ", tipo='" + tipo + '\'' +
-                ", descripcion='" + (descripcion != null ? descripcion.substring(0, Math.min(50, descripcion.length())) + "..." : "null") + '\'' +
+                ", descripcion='" + (descripcion != null ?
+                descripcion.substring(0, Math.min(50, descripcion.length())) : "null") + "'" +
                 ", fecha=" + fecha +
                 ", idCuarto=" + idCuarto +
                 ", estadoReporte='" + estadoReporte + '\'' +
                 ", fechaCierre=" + fechaCierre +
-                ", accionesTomadas='" + (accionesTomadas != null ? accionesTomadas.substring(0, Math.min(50, accionesTomadas.length())) + "..." : "null") + '\'' +
+                ", accionesTomadas='" + (accionesTomadas != null ?
+                accionesTomadas.substring(0, Math.min(50, accionesTomadas.length())) : "null") + "'" +
                 '}';
     }
 }

@@ -26,33 +26,33 @@ public class RolService {
         return rolRepository.findById(id);
     }
 
-    public Optional<Rol> getRolByNombre(String nombreRol) {
-        return rolRepository.findByNombreRol(nombreRol);
+    public Optional<Rol> getRolByTitulo(String titulo) {
+        return rolRepository.findByTitulo(titulo);
     }
 
     public void deleteRol(Integer id) {
         rolRepository.delete(id);
     }
 
-    public boolean existsByNombreRol(String nombreRol) {
-        return rolRepository.existsByNombreRol(nombreRol);
+    public boolean existsByTitulo(String titulo) {
+        return rolRepository.existsByTitulo(titulo);
     }
 
     // Método para crear un nuevo rol con validaciones
     public Rol createRol(Rol rol) {
         // Validaciones básicas
-        if (rol.getNombreRol() == null || rol.getNombreRol().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre del rol es requerido");
+        if (rol.getTitulo() == null || rol.getTitulo().trim().isEmpty()) {
+            throw new IllegalArgumentException("El título del rol es requerido");
         }
 
-        // Validar longitud del nombre
-        if (rol.getNombreRol().length() > 50) {
-            throw new IllegalArgumentException("El nombre del rol no puede exceder 50 caracteres");
+        // Validar longitud del título
+        if (rol.getTitulo().length() > 50) {
+            throw new IllegalArgumentException("El título del rol no puede exceder 50 caracteres");
         }
 
         // Verificar si el rol ya existe
-        if (existsByNombreRol(rol.getNombreRol())) {
-            throw new IllegalArgumentException("El rol '" + rol.getNombreRol() + "' ya existe");
+        if (existsByTitulo(rol.getTitulo())) {
+            throw new IllegalArgumentException("El rol '" + rol.getTitulo() + "' ya existe");
         }
 
         // Guardar el rol
@@ -62,13 +62,13 @@ public class RolService {
     // Método para actualizar un rol existente
     public Rol updateRol(Integer id, Rol rolActualizado) {
         // Validaciones básicas
-        if (rolActualizado.getNombreRol() == null || rolActualizado.getNombreRol().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre del rol es requerido");
+        if (rolActualizado.getTitulo() == null || rolActualizado.getTitulo().trim().isEmpty()) {
+            throw new IllegalArgumentException("El título del rol es requerido");
         }
 
-        // Validar longitud del nombre
-        if (rolActualizado.getNombreRol().length() > 50) {
-            throw new IllegalArgumentException("El nombre del rol no puede exceder 50 caracteres");
+        // Validar longitud del título
+        if (rolActualizado.getTitulo().length() > 50) {
+            throw new IllegalArgumentException("El título del rol no puede exceder 50 caracteres");
         }
 
         // Buscar el rol existente
@@ -79,14 +79,14 @@ public class RolService {
 
         Rol rolExistente = rolExistenteOpt.get();
 
-        // Verificar si el nuevo nombre ya existe (excluyendo el rol actual)
-        Optional<Rol> rolConMismoNombre = rolRepository.findByNombreRol(rolActualizado.getNombreRol());
-        if (rolConMismoNombre.isPresent() && !rolConMismoNombre.get().getIdRol().equals(id)) {
-            throw new IllegalArgumentException("El rol '" + rolActualizado.getNombreRol() + "' ya existe");
+        // Verificar si el nuevo título ya existe (excluyendo el rol actual)
+        Optional<Rol> rolConMismoTitulo = rolRepository.findByTitulo(rolActualizado.getTitulo());
+        if (rolConMismoTitulo.isPresent() && !rolConMismoTitulo.get().getIdRoles().equals(id)) {
+            throw new IllegalArgumentException("El rol '" + rolActualizado.getTitulo() + "' ya existe");
         }
 
         // Actualizar los campos
-        rolExistente.setNombreRol(rolActualizado.getNombreRol());
+        rolExistente.setTitulo(rolActualizado.getTitulo());
 
         // Guardar los cambios
         return rolRepository.save(rolExistente);

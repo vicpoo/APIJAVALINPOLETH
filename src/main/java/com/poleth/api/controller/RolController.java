@@ -23,17 +23,17 @@ public class RolController {
         try {
             Rol rol = objectMapper.readValue(ctx.body(), Rol.class);
 
-            // Validar que el nombre no esté vacío
-            if (rol.getNombreRol() == null || rol.getNombreRol().trim().isEmpty()) {
+            // Validar que el título no esté vacío
+            if (rol.getTitulo() == null || rol.getTitulo().trim().isEmpty()) {
                 ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El nombre del rol es requerido");
+                        .json("El título del rol es requerido");
                 return;
             }
 
             // Verificar si el rol ya existe
-            if (rolService.existsByNombreRol(rol.getNombreRol())) {
+            if (rolService.existsByTitulo(rol.getTitulo())) {
                 ctx.status(HttpStatus.BAD_REQUEST)
-                        .json("El rol '" + rol.getNombreRol() + "' ya existe");
+                        .json("El rol '" + rol.getTitulo() + "' ya existe");
                 return;
             }
 
@@ -77,17 +77,17 @@ public class RolController {
         }
     }
 
-    // Obtener rol por nombre
-    public void getRolByNombre(Context ctx) {
+    // Obtener rol por título
+    public void getRolByTitulo(Context ctx) {
         try {
-            String nombreRol = ctx.pathParam("nombre");
-            Optional<Rol> rol = rolService.getRolByNombre(nombreRol);
+            String titulo = ctx.pathParam("titulo");
+            Optional<Rol> rol = rolService.getRolByTitulo(titulo);
 
             if (rol.isPresent()) {
                 ctx.json(rol.get());
             } else {
                 ctx.status(HttpStatus.NOT_FOUND)
-                        .json("Rol no encontrado: " + nombreRol);
+                        .json("Rol no encontrado: " + titulo);
             }
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -139,11 +139,11 @@ public class RolController {
         }
     }
 
-    // Verificar si existe rol por nombre
-    public void existsByNombre(Context ctx) {
+    // Verificar si existe rol por título
+    public void existsByTitulo(Context ctx) {
         try {
-            String nombreRol = ctx.pathParam("nombre");
-            boolean exists = rolService.existsByNombreRol(nombreRol);
+            String titulo = ctx.pathParam("titulo");
+            boolean exists = rolService.existsByTitulo(titulo);
             ctx.json(new ExistsResponse(exists));
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)

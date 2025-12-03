@@ -144,6 +144,19 @@ public class CatalogoMuebleRepository {
         }
     }
 
+    // Método para buscar muebles por estado
+    public List<CatalogoMueble> findByEstado(String estado) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT cm FROM CatalogoMueble cm WHERE cm.estadoMueble = :estado", CatalogoMueble.class)
+                    .setParameter("estado", estado)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
     // Método adicional: contar todos los muebles del catálogo
     public Long count() {
         EntityManager em = DatabaseConfig.createEntityManager();
@@ -185,6 +198,18 @@ public class CatalogoMuebleRepository {
         try {
             return em.createQuery(
                             "SELECT cm FROM CatalogoMueble cm ORDER BY cm.nombreMueble", CatalogoMueble.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para buscar muebles activos
+    public List<CatalogoMueble> findActivos() {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT cm FROM CatalogoMueble cm WHERE cm.estadoMueble = 'activo'", CatalogoMueble.class)
                     .getResultList();
         } finally {
             em.close();

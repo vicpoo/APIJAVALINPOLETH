@@ -53,9 +53,20 @@ public class CuartoMuebleService {
             throw new IllegalArgumentException("Ya existe un mueble de este tipo en el cuarto");
         }
 
-        // Establecer cantidad por defecto si es null
+        // Establecer valores por defecto si son null
         if (cuartoMueble.getCantidad() == null) {
             cuartoMueble.setCantidad(0);
+        }
+
+        if (cuartoMueble.getEstado() == null || cuartoMueble.getEstado().isEmpty()) {
+            cuartoMueble.setEstado("bueno");
+        }
+
+        // Validar que el estado sea válido (puedes expandir esta lista)
+        String estado = cuartoMueble.getEstado().toLowerCase();
+        if (!estado.equals("bueno") && !estado.equals("regular") &&
+                !estado.equals("malo") && !estado.equals("necesita reparación")) {
+            throw new IllegalArgumentException("Estado inválido. Valores permitidos: 'bueno', 'regular', 'malo', 'necesita reparación'");
         }
 
         // Guardar el cuarto mueble
@@ -73,6 +84,15 @@ public class CuartoMuebleService {
             throw new IllegalArgumentException("El estado no puede exceder 50 caracteres");
         }
 
+        // Validar estado si se proporciona
+        if (cuartoMuebleActualizado.getEstado() != null) {
+            String estado = cuartoMuebleActualizado.getEstado().toLowerCase();
+            if (!estado.equals("bueno") && !estado.equals("regular") &&
+                    !estado.equals("malo") && !estado.equals("necesita reparación")) {
+                throw new IllegalArgumentException("Estado inválido. Valores permitidos: 'bueno', 'regular', 'malo', 'necesita reparación'");
+            }
+        }
+
         // Buscar el cuarto mueble existente
         Optional<CuartoMueble> cuartoMuebleExistenteOpt = cuartoMuebleRepository.findById(id);
         if (cuartoMuebleExistenteOpt.isEmpty()) {
@@ -81,7 +101,8 @@ public class CuartoMuebleService {
 
         CuartoMueble cuartoMuebleExistente = cuartoMuebleExistenteOpt.get();
 
-        // Actualizar campos permitidos (no se pueden cambiar cuarto ni catálogo)
+        // NO se pueden cambiar cuarto ni catálogo (son FK)
+        // Actualizar campos permitidos
         if (cuartoMuebleActualizado.getCantidad() != null) {
             cuartoMuebleExistente.setCantidad(cuartoMuebleActualizado.getCantidad());
         }
@@ -137,5 +158,50 @@ public class CuartoMuebleService {
 
         int updated = cuartoMuebleRepository.updateCantidad(idCuartoMueble, nuevaCantidad);
         return updated > 0;
+    }
+
+    // Método para obtener cuarto muebles por estado
+    public List<CuartoMueble> getCuartoMueblesByEstado(String estado) {
+        return cuartoMuebleRepository.findByEstado(estado);
+    }
+
+    // Método para incrementar cantidad
+    public boolean incrementarCantidad(Integer idCuartoMueble, Integer incremento) {
+        if (incremento == null || incremento <= 0) {
+            throw new IllegalArgumentException("El incremento debe ser un número positivo");
+        }
+
+        Optional<CuartoMueble> cuartoMueble = cuartoMuebleRepository.findById(idCuartoMueble);
+        if (cuartoMueble.isEmpty()) {
+            throw new IllegalArgumentException("Cuarto mueble no encontrado con ID: " + idCuartoMueble);
+        }
+
+        int updated = cuartoMuebleRepository.incrementarCantidad(idCuartoMueble, incremento);
+        return updated > 0;
+    }
+
+    // Método para decrementar cantidad
+    public boolean decrementarCantidad(Integer idCuartoMueble, Integer decremento) {
+        if (decremento == null || decremento <= 0) {
+            throw new IllegalArgumentException("El decremento debe ser un número positivo");
+        }
+
+        Optional<CuartoMueble> cuartoMueble = cuartoMuebleRepository.findById(idCuartoMueble);
+        if (cuartoMueble.isEmpty()) {
+            throw new IllegalArgumentException("Cuarto mueble no encontrado con ID: " + idCuartoMueble);
+        }
+
+        int updated = cuartoMuebleRepository.decrementarCantidad(idCuartoMueble, decremento);
+        return updated > 0;
+    }
+
+    // Método para obtener cuarto muebles con stock por cuarto
+    public List<CuartoMueble> getCuartoMueblesWithStockByCuarto(Integer idCuarto) {
+        return cuartoMuebleRepository.findWithStockByCuarto(idCuarto);
+    }
+
+    // Método para obtener cuarto muebles sin stock por cuarto
+    public List<CuartoMueble> getCuartoMueblesWithoutStockByCuarto(Integer idCuarto) {
+        return cuartoMuebleRepository.findWithoutStockByCuarto(idCuarto);
     }
 }

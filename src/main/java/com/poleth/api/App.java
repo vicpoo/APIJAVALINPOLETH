@@ -35,95 +35,68 @@ public class App {
         }).start(8000);
 
         // === INICIALIZACIÓN DE MÓDULOS ===
+
+        // Repositorios
+        UsuarioRepository usuarioRepository = new UsuarioRepository();
         RolRepository rolRepository = new RolRepository();
-        RolService rolService = new RolService(rolRepository);
-        RolController rolController = new RolController(rolService);
-        RolRoutes rolRoutes = new RolRoutes(rolController);
-
-        PropietarioRepository propietarioRepository = new PropietarioRepository();
-        PropietarioService propietarioService = new PropietarioService(propietarioRepository);
-        PropietarioController propietarioController = new PropietarioController(propietarioService);
-        PropietarioRoutes propietarioRoutes = new PropietarioRoutes(propietarioController);
-
-        InquilinoRepository inquilinoRepository = new InquilinoRepository();
-        InquilinoService inquilinoService = new InquilinoService(inquilinoRepository);
-        InquilinoController inquilinoController = new InquilinoController(inquilinoService);
-        InquilinoRoutes inquilinoRoutes = new InquilinoRoutes(inquilinoController);
-
-        InvitadoRepository invitadoRepository = new InvitadoRepository();
-        InvitadoService invitadoService = new InvitadoService(invitadoRepository);
-        InvitadoController invitadoController = new InvitadoController(invitadoService);
-        InvitadoRoutes invitadoRoutes = new InvitadoRoutes(invitadoController);
-
         CuartoRepository cuartoRepository = new CuartoRepository();
-        CuartoService cuartoService = new CuartoService(cuartoRepository);
-        CuartoController cuartoController = new CuartoController(cuartoService);
-        CuartoRoutes cuartoRoutes = new CuartoRoutes(cuartoController);
-
         CatalogoMuebleRepository catalogoMuebleRepository = new CatalogoMuebleRepository();
-        CatalogoMuebleService catalogoMuebleService = new CatalogoMuebleService(catalogoMuebleRepository);
-        CatalogoMuebleController catalogoMuebleController = new CatalogoMuebleController(catalogoMuebleService);
-        CatalogoMuebleRoutes catalogoMuebleRoutes = new CatalogoMuebleRoutes(catalogoMuebleController);
-
         ContratoRepository contratoRepository = new ContratoRepository();
-        ContratoService contratoService = new ContratoService(contratoRepository);
-        ContratoController contratoController = new ContratoController(contratoService);
-        ContratoRoutes contratoRoutes = new ContratoRoutes(contratoController);
-
         MantenimientoRepository mantenimientoRepository = new MantenimientoRepository();
-        MantenimientoService mantenimientoService = new MantenimientoService(mantenimientoRepository);
-        MantenimientoController mantenimientoController = new MantenimientoController(mantenimientoService);
-        MantenimientoRoutes mantenimientoRoutes = new MantenimientoRoutes(mantenimientoController);
-
         ReporteInquilinoRepository reporteInquilinoRepository = new ReporteInquilinoRepository();
-        ReporteInquilinoService reporteInquilinoService = new ReporteInquilinoService(reporteInquilinoRepository);
-        ReporteInquilinoController reporteInquilinoController = new ReporteInquilinoController(reporteInquilinoService);
-        ReporteInquilinoRoutes reporteInquilinoRoutes = new ReporteInquilinoRoutes(reporteInquilinoController);
-
         HistorialReporteRepository historialReporteRepository = new HistorialReporteRepository();
-        HistorialReporteService historialReporteService = new HistorialReporteService(historialReporteRepository);
-        HistorialReporteController historialReporteController =
-                new HistorialReporteController(historialReporteService, reporteInquilinoService);
-        HistorialReporteRoutes historialReporteRoutes = new HistorialReporteRoutes(historialReporteController);
-
-        LoginRepository loginRepository = new LoginRepository();
-        LoginService loginService = new LoginService(loginRepository, rolRepository, propietarioRepository, inquilinoRepository);
-        LoginController loginController = new LoginController(loginService);
-        LoginRoutes loginRoutes = new LoginRoutes(loginController);
-
-        ImagenCuartoPublicaRepository imagenRepository = new ImagenCuartoPublicaRepository();
-        ImagenCuartoPublicaService imagenService = new ImagenCuartoPublicaService(imagenRepository);
-        ImagenCuartoPublicaController imagenController = new ImagenCuartoPublicaController(imagenService);
-        ImagenCuartoPublicaRoutes imagenRoutes = new ImagenCuartoPublicaRoutes(imagenController);
-
         CuartoMuebleRepository cuartoMuebleRepository = new CuartoMuebleRepository();
-        CuartoMuebleService cuartoMuebleService = new CuartoMuebleService(cuartoMuebleRepository);
-        CuartoMuebleController cuartoMuebleController = new CuartoMuebleController(cuartoMuebleService);
-        CuartoMuebleRoutes cuartoMuebleRoutes = new CuartoMuebleRoutes(cuartoMuebleController);
-
         PagoRepository pagoRepository = new PagoRepository();
-        PagoService pagoService = new PagoService(pagoRepository);
-        PagoController pagoController = new PagoController(pagoService);
-        PagoRoutes pagoRoutes = new PagoRoutes(pagoController);
+        NotificacionRepository notificacionRepository = new NotificacionRepository();
 
-        NotificacionRepository notificacionRepo = new NotificacionRepository();
-        NotificacionService notificacionService = new NotificacionService(notificacionRepo);
-        NotificacionController notificacionController = new NotificacionController(notificacionService,inquilinoService);
+        // Servicios (con dependencias corregidas)
+        UsuarioService usuarioService = new UsuarioService(usuarioRepository, rolRepository);
+        RolService rolService = new RolService(rolRepository);
+        CuartoService cuartoService = new CuartoService(cuartoRepository);
+        CatalogoMuebleService catalogoMuebleService = new CatalogoMuebleService(catalogoMuebleRepository);
+        ContratoService contratoService = new ContratoService(contratoRepository);
+        MantenimientoService mantenimientoService = new MantenimientoService(mantenimientoRepository);
+        ReporteInquilinoService reporteInquilinoService = new ReporteInquilinoService(reporteInquilinoRepository);
+        HistorialReporteService historialReporteService = new HistorialReporteService(historialReporteRepository);
+        CuartoMuebleService cuartoMuebleService = new CuartoMuebleService(cuartoMuebleRepository);
+        PagoService pagoService = new PagoService(pagoRepository);
+        NotificacionService notificacionService = new NotificacionService(notificacionRepository, usuarioRepository);
+
+        // Controladores (con dependencias corregidas)
+        UsuarioController usuarioController = new UsuarioController(usuarioService);
+        RolController rolController = new RolController(rolService);
+        CuartoController cuartoController = new CuartoController(cuartoService);
+        CatalogoMuebleController catalogoMuebleController = new CatalogoMuebleController(catalogoMuebleService);
+        ContratoController contratoController = new ContratoController(contratoService);
+        MantenimientoController mantenimientoController = new MantenimientoController(mantenimientoService);
+        ReporteInquilinoController reporteInquilinoController = new ReporteInquilinoController(reporteInquilinoService);
+        HistorialReporteController historialReporteController = new HistorialReporteController(historialReporteService, reporteInquilinoService);
+        CuartoMuebleController cuartoMuebleController = new CuartoMuebleController(cuartoMuebleService);
+        PagoController pagoController = new PagoController(pagoService);
+        NotificacionController notificacionController = new NotificacionController(notificacionService);
+
+        // Rutas
+        UsuarioRoutes usuarioRoutes = new UsuarioRoutes(usuarioController);
+        RolRoutes rolRoutes = new RolRoutes(rolController);
+        CuartoRoutes cuartoRoutes = new CuartoRoutes(cuartoController);
+        CatalogoMuebleRoutes catalogoMuebleRoutes = new CatalogoMuebleRoutes(catalogoMuebleController);
+        ContratoRoutes contratoRoutes = new ContratoRoutes(contratoController);
+        MantenimientoRoutes mantenimientoRoutes = new MantenimientoRoutes(mantenimientoController);
+        ReporteInquilinoRoutes reporteInquilinoRoutes = new ReporteInquilinoRoutes(reporteInquilinoController);
+        HistorialReporteRoutes historialReporteRoutes = new HistorialReporteRoutes(historialReporteController);
+        CuartoMuebleRoutes cuartoMuebleRoutes = new CuartoMuebleRoutes(cuartoMuebleController);
+        PagoRoutes pagoRoutes = new PagoRoutes(pagoController);
         NotificacionRoutes notificacionRoutes = new NotificacionRoutes(notificacionController);
 
-        // Registrar rutas
+        // Registrar rutas (agregando UsuarioRoutes que faltaba)
+        usuarioRoutes.configureRoutes(app);
         rolRoutes.configureRoutes(app);
-        propietarioRoutes.configureRoutes(app);
-        inquilinoRoutes.configureRoutes(app);
-        invitadoRoutes.configureRoutes(app);
         cuartoRoutes.configureRoutes(app);
         catalogoMuebleRoutes.configureRoutes(app);
         contratoRoutes.configureRoutes(app);
         mantenimientoRoutes.configureRoutes(app);
         reporteInquilinoRoutes.configureRoutes(app);
         historialReporteRoutes.configureRoutes(app);
-        loginRoutes.configureRoutes(app);
-        imagenRoutes.configureRoutes(app);
         cuartoMuebleRoutes.configureRoutes(app);
         pagoRoutes.configureRoutes(app);
         notificacionRoutes.configureRoutes(app);
@@ -131,17 +104,25 @@ public class App {
         // Endpoint de prueba
         app.get("/", ctx -> ctx.result("🚀 API Poleth funcionando correctamente con CORS habilitado"));
 
-        app.exception(Exception.class, (e, ctx) -> {
-            e.printStackTrace();
-            ctx.status(500).json("Error interno: " + e.getMessage());
+        // Health check endpoint
+        app.get("/api/health", ctx -> {
+            ctx.json("{\"status\": \"ok\", \"message\": \"API funcionando correctamente\"}");
         });
 
-        app.error(404, ctx -> ctx.json("Endpoint no encontrado: " + ctx.path()));
+        // Manejo de excepciones global
+        app.exception(Exception.class, (e, ctx) -> {
+            e.printStackTrace();
+            ctx.status(500).json("{\"error\": \"Error interno del servidor: " + e.getMessage() + "\"}");
+        });
+
+        app.error(404, ctx -> {
+            ctx.json("{\"error\": \"Endpoint no encontrado: " + ctx.path() + "\"}");
+        });
 
         System.out.println("==================================================");
         System.out.println("🚀 Servidor Poleth iniciado correctamente!");
         System.out.println("📍 URL: http://localhost:8000");
-        System.out.println("🔧 CORS habilitado ✅ Javalin 5 OK");
+        System.out.println("📊 Endpoints disponibles:");
         System.out.println("==================================================");
     }
 }

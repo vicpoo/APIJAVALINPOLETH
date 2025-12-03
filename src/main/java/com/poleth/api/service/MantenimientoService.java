@@ -59,6 +59,14 @@ public class MantenimientoService {
             throw new IllegalArgumentException("El costo de mantenimiento no puede ser negativo");
         }
 
+        // Validar costo máximo (10,2 decimales)
+        if (mantenimiento.getCostoMantenimiento() != null) {
+            BigDecimal costoMaximo = new BigDecimal("99999999.99");
+            if (mantenimiento.getCostoMantenimiento().compareTo(costoMaximo) > 0) {
+                throw new IllegalArgumentException("El costo de mantenimiento no puede exceder 99,999,999.99");
+            }
+        }
+
         // Validar fechas si ambas están presentes
         if (mantenimiento.getFechaAtencion() != null && mantenimiento.getFechaReporte() != null) {
             if (mantenimiento.getFechaAtencion().isBefore(mantenimiento.getFechaReporte())) {
@@ -66,12 +74,17 @@ public class MantenimientoService {
             }
         }
 
-        // Guardar el mantenimiento
-        Mantenimiento mantenimientoGuardado = mantenimientoRepository.save(mantenimiento);
+        // Establecer valores por defecto si no están presentes
+        if (mantenimiento.getEstadoMantenimiento() == null || mantenimiento.getEstadoMantenimiento().trim().isEmpty()) {
+            mantenimiento.setEstadoMantenimiento("pendiente");
+        }
 
-        // Recargar con relaciones para evitar LazyInitializationException
-        return mantenimientoRepository.findById(mantenimientoGuardado.getIdMantenimiento())
-                .orElseThrow(() -> new RuntimeException("Error al recuperar el mantenimiento creado"));
+        if (mantenimiento.getCostoMantenimiento() == null) {
+            mantenimiento.setCostoMantenimiento(BigDecimal.ZERO);
+        }
+
+        // Guardar el mantenimiento
+        return mantenimientoRepository.save(mantenimiento);
     }
 
     // Método para actualizar un mantenimiento existente
@@ -82,7 +95,8 @@ public class MantenimientoService {
         }
 
         // Validar descripción del problema
-        if (mantenimientoActualizado.getDescripcionProblema() == null || mantenimientoActualizado.getDescripcionProblema().trim().isEmpty()) {
+        if (mantenimientoActualizado.getDescripcionProblema() == null ||
+                mantenimientoActualizado.getDescripcionProblema().trim().isEmpty()) {
             throw new IllegalArgumentException("La descripción del problema es requerida");
         }
 
@@ -96,6 +110,14 @@ public class MantenimientoService {
         if (mantenimientoActualizado.getCostoMantenimiento() != null &&
                 mantenimientoActualizado.getCostoMantenimiento().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("El costo de mantenimiento no puede ser negativo");
+        }
+
+        // Validar costo máximo
+        if (mantenimientoActualizado.getCostoMantenimiento() != null) {
+            BigDecimal costoMaximo = new BigDecimal("99999999.99");
+            if (mantenimientoActualizado.getCostoMantenimiento().compareTo(costoMaximo) > 0) {
+                throw new IllegalArgumentException("El costo de mantenimiento no puede exceder 99,999,999.99");
+            }
         }
 
         // Validar fechas si ambas están presentes
@@ -122,11 +144,7 @@ public class MantenimientoService {
         mantenimientoExistente.setCostoMantenimiento(mantenimientoActualizado.getCostoMantenimiento());
 
         // Guardar los cambios
-        mantenimientoRepository.save(mantenimientoExistente);
-
-        // Recargar con relaciones para evitar LazyInitializationException
-        return mantenimientoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error al recuperar el mantenimiento actualizado"));
+        return mantenimientoRepository.save(mantenimientoExistente);
     }
 
     // Método para verificar si un mantenimiento existe por ID
@@ -135,7 +153,8 @@ public class MantenimientoService {
     }
 
     // Método para atender un mantenimiento
-    public Mantenimiento atenderMantenimiento(Integer idMantenimiento, LocalDate fechaAtencion, BigDecimal costo, String estado) {
+    public Mantenimiento atenderMantenimiento(Integer idMantenimiento, LocalDate fechaAtencion,
+                                              BigDecimal costo, String estado) {
         Optional<Mantenimiento> mantenimientoOpt = mantenimientoRepository.findById(idMantenimiento);
         if (mantenimientoOpt.isEmpty()) {
             throw new IllegalArgumentException("Mantenimiento no encontrado con ID: " + idMantenimiento);
@@ -153,19 +172,31 @@ public class MantenimientoService {
             throw new IllegalArgumentException("El costo de mantenimiento no puede ser negativo");
         }
 
+        // Validar costo máximo
+        if (costo != null) {
+            BigDecimal costoMaximo = new BigDecimal("99999999.99");
+            if (costo.compareTo(costoMaximo) > 0) {
+                throw new IllegalArgumentException("El costo de mantenimiento no puede exceder 99,999,999.99");
+            }
+        }
+
         // Validar longitud del estado
         if (estado != null && estado.length() > 50) {
             throw new IllegalArgumentException("El estado del mantenimiento no puede exceder 50 caracteres");
         }
 
         mantenimiento.setFechaAtencion(fechaAtencion);
-        mantenimiento.setCostoMantenimiento(costo);
-        mantenimiento.setEstadoMantenimiento(estado);
 
-        // Guardar y recargar con relaciones
-        mantenimientoRepository.save(mantenimiento);
-        return mantenimientoRepository.findById(idMantenimiento)
-                .orElseThrow(() -> new RuntimeException("Error al recuperar el mantenimiento actualizado"));
+        if (costo != null) {
+            mantenimiento.setCostoMantenimiento(costo);
+        }
+
+        if (estado != null) {
+            mantenimiento.setEstadoMantenimiento(estado);
+        }
+
+        // Guardar
+        return mantenimientoRepository.save(mantenimiento);
     }
 
     // Método para actualizar solo el estado del mantenimiento
@@ -183,9 +214,58 @@ public class MantenimientoService {
         Mantenimiento mantenimiento = mantenimientoOpt.get();
         mantenimiento.setEstadoMantenimiento(nuevoEstado);
 
-        // Guardar y recargar con relaciones
-        mantenimientoRepository.save(mantenimiento);
-        return mantenimientoRepository.findById(idMantenimiento)
-                .orElseThrow(() -> new RuntimeException("Error al recuperar el mantenimiento actualizado"));
+        // Guardar
+        return mantenimientoRepository.save(mantenimiento);
+    }
+
+    // Métodos de consulta adicionales
+    public List<Mantenimiento> getMantenimientosByCuarto(Integer idCuarto) {
+        return mantenimientoRepository.findByIdCuarto(idCuarto);
+    }
+
+    public List<Mantenimiento> getMantenimientosByEstado(String estado) {
+        return mantenimientoRepository.findByEstadoMantenimiento(estado);
+    }
+
+    public List<Mantenimiento> getMantenimientosPendientes() {
+        return mantenimientoRepository.findPendientes();
+    }
+
+    public List<Mantenimiento> getMantenimientosCompletados() {
+        return mantenimientoRepository.findCompletados();
+    }
+
+    public List<Mantenimiento> getMantenimientosByFechaReporteBetween(LocalDate fechaInicio, LocalDate fechaFin) {
+        return mantenimientoRepository.findByFechaReporteBetween(fechaInicio, fechaFin);
+    }
+
+    public List<Mantenimiento> getMantenimientosPendientesByCuarto(Integer idCuarto) {
+        return mantenimientoRepository.findPendientesByCuarto(idCuarto);
+    }
+
+    // Métodos de estadísticas
+    public Long contarTotalMantenimientos() {
+        return mantenimientoRepository.count();
+    }
+
+    public Long contarMantenimientosPendientes() {
+        return mantenimientoRepository.countPendientes();
+    }
+
+    public Long contarMantenimientosCompletados() {
+        return mantenimientoRepository.countCompletados();
+    }
+
+    public BigDecimal calcularCostoTotalMantenimientos() {
+        List<Mantenimiento> mantenimientos = mantenimientoRepository.findAll();
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Mantenimiento m : mantenimientos) {
+            if (m.getCostoMantenimiento() != null) {
+                total = total.add(m.getCostoMantenimiento());
+            }
+        }
+
+        return total;
     }
 }

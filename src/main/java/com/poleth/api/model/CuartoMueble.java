@@ -4,7 +4,7 @@ package com.poleth.api.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "cuarto_mueble")
+@Table(name = "Cuarto_Mueble")
 public class CuartoMueble {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +21,7 @@ public class CuartoMueble {
     private Integer cantidad = 0;
 
     @Column(name = "estado", length = 50)
-    private String estado;
+    private String estado = "bueno";
 
     // Constructor por defecto
     public CuartoMueble() {
@@ -98,6 +98,10 @@ public class CuartoMueble {
 
     public boolean necesitaReposicion() {
         return cantidad != null && cantidad == 0;
+    }
+
+    public boolean estaEnBuenEstado() {
+        return "bueno".equalsIgnoreCase(estado);
     }
 
     // toString para debugging

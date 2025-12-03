@@ -20,7 +20,7 @@ public class RolRoutes {
         app.delete("/api/roles/{id}", rolController::deleteRol);
 
         // Rutas adicionales para funcionalidades específicas
-        app.get("/api/roles/nombre/{nombre}", rolController::getRolByNombre);
-        app.get("/api/roles/exists/{nombre}", rolController::existsByNombre);
+        app.get("/api/roles/titulo/{titulo}", rolController::getRolByTitulo);
+        app.get("/api/roles/exists/{titulo}", rolController::existsByTitulo);
     }
 }

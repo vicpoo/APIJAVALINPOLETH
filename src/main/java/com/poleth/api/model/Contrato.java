@@ -1,9 +1,11 @@
 // Contrato.java
 package com.poleth.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Contratos")
@@ -29,35 +31,43 @@ public class Contrato {
     private LocalDate fechaPagoEstablecida;
 
     @Column(name = "estado_contrato", length = 50)
-    private String estadoContrato;
+    private String estadoContrato = "activo";
 
     @Column(name = "monto_renta_acordada", precision = 10, scale = 2)
-    private BigDecimal montoRentaAcordada;
+    private BigDecimal montoRentaAcordada = BigDecimal.ZERO;
 
-    // Relaciones Many-to-One (opcionales)
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    // CORRECCIÓN: Agregar JsonIgnoreProperties para evitar errores de lazy loading
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_cuarto", insertable = false, updatable = false)
+    @JoinColumn(name = "id_cuarto", referencedColumnName = "id_cuarto", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"propietario", "hibernateLazyInitializer", "handler"})
     private Cuarto cuarto;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_inquilino", insertable = false, updatable = false)
-    private Inquilino inquilino;
+    @JoinColumn(name = "id_inquilino", referencedColumnName = "id_usuario", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
+    private Usuario inquilino;
 
     // Constructor por defecto
     public Contrato() {
+        this.createdAt = LocalDateTime.now();
     }
 
     // Constructor con parámetros básicos
     public Contrato(Integer idCuarto, Integer idInquilino, LocalDate fechaInicio) {
+        this();
         this.idCuarto = idCuarto;
         this.idInquilino = idInquilino;
         this.fechaInicio = fechaInicio;
     }
 
     // Constructor completo
-    public Contrato(Integer idCuarto, Integer idInquilino, LocalDate fechaInicio, 
-                   LocalDate fechaFinalizacion, LocalDate fechaPagoEstablecida, 
-                   String estadoContrato, BigDecimal montoRentaAcordada) {
+    public Contrato(Integer idCuarto, Integer idInquilino, LocalDate fechaInicio,
+                    LocalDate fechaFinalizacion, LocalDate fechaPagoEstablecida,
+                    String estadoContrato, BigDecimal montoRentaAcordada) {
+        this();
         this.idCuarto = idCuarto;
         this.idInquilino = idInquilino;
         this.fechaInicio = fechaInicio;
@@ -132,6 +142,14 @@ public class Contrato {
         this.montoRentaAcordada = montoRentaAcordada;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public Cuarto getCuarto() {
         return cuarto;
     }
@@ -140,12 +158,49 @@ public class Contrato {
         this.cuarto = cuarto;
     }
 
-    public Inquilino getInquilino() {
+    public Usuario getInquilino() {
         return inquilino;
     }
 
-    public void setInquilino(Inquilino inquilino) {
+    public void setInquilino(Usuario inquilino) {
         this.inquilino = inquilino;
+    }
+
+    // Métodos utilitarios
+    public boolean estaActivo() {
+        return "activo".equalsIgnoreCase(estadoContrato);
+    }
+
+    public boolean estaFinalizado() {
+        return "finalizado".equalsIgnoreCase(estadoContrato) ||
+                "cancelado".equalsIgnoreCase(estadoContrato);
+    }
+
+    public boolean estaVigente() {
+        LocalDate hoy = LocalDate.now();
+        boolean inicioValido = !fechaInicio.isAfter(hoy);
+        boolean finValido = fechaFinalizacion == null || !fechaFinalizacion.isBefore(hoy);
+        return inicioValido && finValido;
+    }
+
+    public boolean estaPorVencer() {
+        if (fechaFinalizacion == null) return false;
+        LocalDate hoy = LocalDate.now();
+        return fechaFinalizacion.isAfter(hoy) && fechaFinalizacion.isBefore(hoy.plusDays(30));
+    }
+
+    // Método para establecer el timestamp antes de persistir
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (estadoContrato == null || estadoContrato.isEmpty()) {
+            estadoContrato = "activo";
+        }
+        if (montoRentaAcordada == null) {
+            montoRentaAcordada = BigDecimal.ZERO;
+        }
     }
 
     // toString para debugging
@@ -160,6 +215,7 @@ public class Contrato {
                 ", fechaPagoEstablecida=" + fechaPagoEstablecida +
                 ", estadoContrato='" + estadoContrato + '\'' +
                 ", montoRentaAcordada=" + montoRentaAcordada +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

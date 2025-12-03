@@ -79,7 +79,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto",
+                            CuartoMueble.class)
                     .setParameter("idCuarto", idCuarto)
                     .getResultList();
         } finally {
@@ -92,7 +93,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCatalogoMueble = :idCatalogoMueble", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCatalogoMueble = :idCatalogoMueble",
+                            CuartoMueble.class)
                     .setParameter("idCatalogoMueble", idCatalogoMueble)
                     .getResultList();
         } finally {
@@ -105,7 +107,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.idCatalogoMueble = :idCatalogoMueble", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.idCatalogoMueble = :idCatalogoMueble",
+                            CuartoMueble.class)
                     .setParameter("idCuarto", idCuarto)
                     .setParameter("idCatalogoMueble", idCatalogoMueble)
                     .getResultStream()
@@ -122,7 +125,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.estado = :estado", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.estado = :estado",
+                            CuartoMueble.class)
                     .setParameter("estado", estado)
                     .getResultList();
         } finally {
@@ -135,7 +139,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.cantidad > 0", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.cantidad > 0",
+                            CuartoMueble.class)
                     .getResultList();
         } finally {
             em.close();
@@ -147,7 +152,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.cantidad = 0", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.cantidad = 0",
+                            CuartoMueble.class)
                     .getResultList();
         } finally {
             em.close();
@@ -159,7 +165,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.cantidad > 0", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.cantidad > 0",
+                            CuartoMueble.class)
                     .setParameter("idCuarto", idCuarto)
                     .getResultList();
         } finally {
@@ -172,7 +179,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.cantidad = 0", CuartoMueble.class)
+                            "SELECT cm FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.cantidad = 0",
+                            CuartoMueble.class)
                     .setParameter("idCuarto", idCuarto)
                     .getResultList();
         } finally {
@@ -185,7 +193,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.idCatalogoMueble = :idCatalogoMueble", Long.class)
+                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto AND cm.idCatalogoMueble = :idCatalogoMueble",
+                            Long.class)
                     .setParameter("idCuarto", idCuarto)
                     .setParameter("idCatalogoMueble", idCatalogoMueble)
                     .getSingleResult();
@@ -200,7 +209,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto", Long.class)
+                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto",
+                            Long.class)
                     .setParameter("idCuarto", idCuarto)
                     .getSingleResult();
             return count > 0;
@@ -214,7 +224,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCatalogoMueble = :idCatalogoMueble", Long.class)
+                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCatalogoMueble = :idCatalogoMueble",
+                            Long.class)
                     .setParameter("idCatalogoMueble", idCatalogoMueble)
                     .getSingleResult();
             return count > 0;
@@ -239,7 +250,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto", Long.class)
+                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto",
+                            Long.class)
                     .setParameter("idCuarto", idCuarto)
                     .getSingleResult();
         } finally {
@@ -252,7 +264,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCatalogoMueble = :idCatalogoMueble", Long.class)
+                            "SELECT COUNT(cm) FROM CuartoMueble cm WHERE cm.idCatalogoMueble = :idCatalogoMueble",
+                            Long.class)
                     .setParameter("idCatalogoMueble", idCatalogoMueble)
                     .getSingleResult();
         } finally {
@@ -265,7 +278,8 @@ public class CuartoMuebleRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT SUM(cm.cantidad) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto", Long.class)
+                            "SELECT SUM(cm.cantidad) FROM CuartoMueble cm WHERE cm.idCuarto = :idCuarto",
+                            Long.class)
                     .setParameter("idCuarto", idCuarto)
                     .getSingleResult();
         } finally {

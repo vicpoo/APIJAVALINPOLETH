@@ -15,7 +15,7 @@ public class RolRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             em.getTransaction().begin();
-            if (rol.getIdRol() == null) {
+            if (rol.getIdRoles() == null) {
                 em.persist(rol);
             } else {
                 rol = em.merge(rol);
@@ -74,13 +74,13 @@ public class RolRepository {
         }
     }
 
-    // Método para buscar rol por nombre
-    public Optional<Rol> findByNombreRol(String nombreRol) {
+    // Método para buscar rol por título (antes era por nombre)
+    public Optional<Rol> findByTitulo(String titulo) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT r FROM Rol r WHERE r.nombreRol = :nombreRol", Rol.class)
-                    .setParameter("nombreRol", nombreRol)
+                            "SELECT r FROM Rol r WHERE r.titulo = :titulo", Rol.class)
+                    .setParameter("titulo", titulo)
                     .getResultStream()
                     .findFirst();
         } catch (NoResultException e) {
@@ -90,13 +90,13 @@ public class RolRepository {
         }
     }
 
-    // Método para verificar existencia de rol por nombre
-    public boolean existsByNombreRol(String nombreRol) {
+    // Método para verificar existencia de rol por título
+    public boolean existsByTitulo(String titulo) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                            "SELECT COUNT(r) FROM Rol r WHERE r.nombreRol = :nombreRol", Long.class)
-                    .setParameter("nombreRol", nombreRol)
+                            "SELECT COUNT(r) FROM Rol r WHERE r.titulo = :titulo", Long.class)
+                    .setParameter("titulo", titulo)
                     .getSingleResult();
             return count > 0;
         } finally {

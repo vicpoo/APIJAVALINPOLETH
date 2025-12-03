@@ -34,35 +34,34 @@ public class ContratoRepository {
         }
     }
 
-    // Método para obtener todos los contratos CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para obtener todos los contratos CON relaciones COMPLETAS
     public List<Contrato> findAll() {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
                     .getResultList();
         } finally {
             em.close();
         }
     }
 
-    // Método para buscar contrato por ID CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contrato por ID CON relaciones
     public Optional<Contrato> findById(Integer id) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             TypedQuery<Contrato> query = em.createQuery(
                     "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.idContrato = :id", 
+                            "LEFT JOIN FETCH c.cuarto " +
+                            "LEFT JOIN FETCH c.inquilino " +
+                            "WHERE c.idContrato = :id",
                     Contrato.class);
             query.setParameter("id", id);
-            
+
             try {
                 Contrato contrato = query.getSingleResult();
                 return Optional.of(contrato);
@@ -94,17 +93,17 @@ public class ContratoRepository {
         }
     }
 
-    // Método para buscar contratos por cuarto CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contratos por cuarto CON relaciones
     public List<Contrato> findByIdCuarto(Integer idCuarto) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.idCuarto = :idCuarto", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.idCuarto = :idCuarto " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
                     .setParameter("idCuarto", idCuarto)
                     .getResultList();
         } finally {
@@ -112,17 +111,17 @@ public class ContratoRepository {
         }
     }
 
-    // Método para buscar contratos por inquilino CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contratos por inquilino CON relaciones
     public List<Contrato> findByIdInquilino(Integer idInquilino) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.idInquilino = :idInquilino", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.idInquilino = :idInquilino " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
                     .setParameter("idInquilino", idInquilino)
                     .getResultList();
         } finally {
@@ -130,17 +129,17 @@ public class ContratoRepository {
         }
     }
 
-    // Método para buscar contratos por estado CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contratos por estado CON relaciones
     public List<Contrato> findByEstadoContrato(String estadoContrato) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.estadoContrato = :estadoContrato", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.estadoContrato = :estadoContrato " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
                     .setParameter("estadoContrato", estadoContrato)
                     .getResultList();
         } finally {
@@ -148,34 +147,34 @@ public class ContratoRepository {
         }
     }
 
-    // Método para buscar contratos activos CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contratos activos CON relaciones
     public List<Contrato> findContratosActivos() {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.fechaFinalizacion IS NULL OR c.fechaFinalizacion > CURRENT_DATE", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.estadoContrato = 'activo' " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
                     .getResultList();
         } finally {
             em.close();
         }
     }
 
-    // Método para buscar contratos por rango de fechas de inicio CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contratos por rango de fechas de inicio CON relaciones
     public List<Contrato> findByFechaInicioBetween(LocalDate fechaInicio, LocalDate fechaFin) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.fechaInicio BETWEEN :fechaInicio AND :fechaFin", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.fechaInicio BETWEEN :fechaInicio AND :fechaFin " +
+                                    "ORDER BY c.fechaInicio",
+                            Contrato.class)
                     .setParameter("fechaInicio", fechaInicio)
                     .setParameter("fechaFin", fechaFin)
                     .getResultList();
@@ -184,17 +183,17 @@ public class ContratoRepository {
         }
     }
 
-    // Método para buscar contratos que expiran en una fecha específica CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contratos que expiran en una fecha específica CON relaciones
     public List<Contrato> findByFechaFinalizacion(LocalDate fechaFinalizacion) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.fechaFinalizacion = :fechaFinalizacion", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.fechaFinalizacion = :fechaFinalizacion " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
                     .setParameter("fechaFinalizacion", fechaFinalizacion)
                     .getResultList();
         } finally {
@@ -202,18 +201,21 @@ public class ContratoRepository {
         }
     }
 
-    // Método para buscar contratos próximos a expirar CON relaciones COMPLETAS - USANDO JOIN FETCH PROFUNDO
+    // Método para buscar contratos próximos a expirar CON relaciones
     public List<Contrato> findContratosProximosAExpirar(int dias) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
-            LocalDate fechaLimite = LocalDate.now().plusDays(dias);
+            LocalDate hoy = LocalDate.now();
+            LocalDate fechaLimite = hoy.plusDays(dias);
             return em.createQuery(
-                    "SELECT c FROM Contrato c " +
-                    "LEFT JOIN FETCH c.cuarto cuarto " +
-                    "LEFT JOIN FETCH cuarto.propietario " +
-                    "LEFT JOIN FETCH c.inquilino " +
-                    "WHERE c.fechaFinalizacion BETWEEN CURRENT_DATE AND :fechaLimite", 
-                    Contrato.class)
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.fechaFinalizacion BETWEEN :hoy AND :fechaLimite " +
+                                    "AND c.estadoContrato = 'activo' " +
+                                    "ORDER BY c.fechaFinalizacion",
+                            Contrato.class)
+                    .setParameter("hoy", hoy)
                     .setParameter("fechaLimite", fechaLimite)
                     .getResultList();
         } finally {
@@ -226,8 +228,11 @@ public class ContratoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                    "SELECT COUNT(c) FROM Contrato c WHERE c.idCuarto = :idCuarto AND (c.fechaFinalizacion IS NULL OR c.fechaFinalizacion > CURRENT_DATE)", 
-                    Long.class)
+                            "SELECT COUNT(c) FROM Contrato c " +
+                                    "WHERE c.idCuarto = :idCuarto " +
+                                    "AND c.estadoContrato = 'activo' " +
+                                    "AND (c.fechaFinalizacion IS NULL OR c.fechaFinalizacion >= CURRENT_DATE)",
+                            Long.class)
                     .setParameter("idCuarto", idCuarto)
                     .getSingleResult();
             return count > 0;
@@ -241,8 +246,11 @@ public class ContratoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                    "SELECT COUNT(c) FROM Contrato c WHERE c.idInquilino = :idInquilino AND (c.fechaFinalizacion IS NULL OR c.fechaFinalizacion > CURRENT_DATE)", 
-                    Long.class)
+                            "SELECT COUNT(c) FROM Contrato c " +
+                                    "WHERE c.idInquilino = :idInquilino " +
+                                    "AND c.estadoContrato = 'activo' " +
+                                    "AND (c.fechaFinalizacion IS NULL OR c.fechaFinalizacion >= CURRENT_DATE)",
+                            Long.class)
                     .setParameter("idInquilino", idInquilino)
                     .getSingleResult();
             return count > 0;
@@ -256,8 +264,9 @@ public class ContratoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                    "SELECT COUNT(c) FROM Contrato c WHERE c.idCuarto = :idCuarto AND c.idInquilino = :idInquilino", 
-                    Long.class)
+                            "SELECT COUNT(c) FROM Contrato c " +
+                                    "WHERE c.idCuarto = :idCuarto AND c.idInquilino = :idInquilino",
+                            Long.class)
                     .setParameter("idCuarto", idCuarto)
                     .setParameter("idInquilino", idInquilino)
                     .getSingleResult();
@@ -283,8 +292,10 @@ public class ContratoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT COUNT(c) FROM Contrato c WHERE c.fechaFinalizacion IS NULL OR c.fechaFinalizacion > CURRENT_DATE", 
-                    Long.class)
+                            "SELECT COUNT(c) FROM Contrato c " +
+                                    "WHERE c.estadoContrato = 'activo' " +
+                                    "AND (c.fechaFinalizacion IS NULL OR c.fechaFinalizacion >= CURRENT_DATE)",
+                            Long.class)
                     .getSingleResult();
         } finally {
             em.close();
@@ -296,8 +307,9 @@ public class ContratoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT COUNT(c) FROM Contrato c WHERE c.estadoContrato = :estadoContrato", 
-                    Long.class)
+                            "SELECT COUNT(c) FROM Contrato c " +
+                                    "WHERE c.estadoContrato = :estadoContrato",
+                            Long.class)
                     .setParameter("estadoContrato", estadoContrato)
                     .getSingleResult();
         } finally {
@@ -305,13 +317,94 @@ public class ContratoRepository {
         }
     }
 
-    // Método para obtener contratos con relaciones (ya no es necesario, findAll ya lo hace)
-    public List<Contrato> findAllWithRelations() {
-        return findAll(); // Ya implementado en findAll()
+    // Método para verificar existencia de contrato por ID
+    public boolean existsById(Integer id) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            Long count = em.createQuery(
+                            "SELECT COUNT(c) FROM Contrato c WHERE c.idContrato = :id",
+                            Long.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+            return count > 0;
+        } finally {
+            em.close();
+        }
     }
 
-    // Método para buscar contrato por ID con relaciones (ya no es necesario, findById ya lo hace)
-    public Optional<Contrato> findByIdWithRelations(Integer id) {
-        return findById(id); // Ya implementado en findById()
+    // Método para buscar contratos con paginación
+    public List<Contrato> findPaginados(int inicio, int tamaño) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
+                    .setFirstResult(inicio)
+                    .setMaxResults(tamaño)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para buscar contratos vencidos
+    public List<Contrato> findContratosVencidos() {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.fechaFinalizacion < CURRENT_DATE " +
+                                    "AND c.estadoContrato = 'activo' " +
+                                    "ORDER BY c.fechaFinalizacion",
+                            Contrato.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para buscar contratos por fecha de pago establecida
+    public List<Contrato> findByFechaPagoEstablecida(LocalDate fechaPago) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.fechaPagoEstablecida = :fechaPago " +
+                                    "ORDER BY c.createdAt DESC",
+                            Contrato.class)
+                    .setParameter("fechaPago", fechaPago)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para buscar contratos con pagos próximos
+    public List<Contrato> findContratosConPagosProximos(int dias) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            LocalDate hoy = LocalDate.now();
+            LocalDate fechaLimite = hoy.plusDays(dias);
+            return em.createQuery(
+                            "SELECT c FROM Contrato c " +
+                                    "LEFT JOIN FETCH c.cuarto " +
+                                    "LEFT JOIN FETCH c.inquilino " +
+                                    "WHERE c.fechaPagoEstablecida BETWEEN :hoy AND :fechaLimite " +
+                                    "AND c.estadoContrato = 'activo' " +
+                                    "ORDER BY c.fechaPagoEstablecida",
+                            Contrato.class)
+                    .setParameter("hoy", hoy)
+                    .setParameter("fechaLimite", fechaLimite)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
     }
 }

@@ -52,6 +52,16 @@ public class CuartoService {
             throw new IllegalArgumentException("El precio de alquiler no puede ser negativo");
         }
 
+        // Establecer estado por defecto si es null
+        if (cuarto.getEstadoCuarto() == null || cuarto.getEstadoCuarto().isEmpty()) {
+            cuarto.setEstadoCuarto("disponible");
+        }
+
+        // Establecer precio por defecto si es null
+        if (cuarto.getPrecioAlquiler() == null) {
+            cuarto.setPrecioAlquiler(BigDecimal.ZERO);
+        }
+
         // Verificar si ya existe un cuarto con el mismo nombre para el mismo propietario
         if (cuartoRepository.existsByNombreAndPropietario(cuarto.getNombreCuarto(), cuarto.getIdPropietario())) {
             throw new IllegalArgumentException("Ya existe un cuarto con el nombre '" + cuarto.getNombreCuarto() + "' para este propietario");
@@ -100,7 +110,7 @@ public class CuartoService {
             throw new IllegalArgumentException("Ya existe un cuarto con el nombre '" + cuartoActualizado.getNombreCuarto() + "' para este propietario");
         }
 
-        // Actualizar los campos
+        // Actualizar los campos (no actualizamos idPropietario ni createdAt)
         cuartoExistente.setNombreCuarto(cuartoActualizado.getNombreCuarto());
         cuartoExistente.setPrecioAlquiler(cuartoActualizado.getPrecioAlquiler());
         cuartoExistente.setEstadoCuarto(cuartoActualizado.getEstadoCuarto());
@@ -116,7 +126,7 @@ public class CuartoService {
 
     // Método para verificar si un cuarto existe por ID
     public boolean existsById(Integer id) {
-        return cuartoRepository.findById(id).isPresent();
+        return cuartoRepository.existsById(id);
     }
 
     // Método para obtener cuartos por propietario
@@ -164,5 +174,15 @@ public class CuartoService {
         cuartoRepository.save(cuarto);
         return cuartoRepository.findById(idCuarto)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el cuarto actualizado"));
+    }
+
+    // Método para obtener cuartos disponibles
+    public List<Cuarto> getCuartosDisponibles() {
+        return cuartoRepository.findAvailable();
+    }
+
+    // Método para buscar cuartos por estado
+    public List<Cuarto> getCuartosPorEstado(String estado) {
+        return cuartoRepository.findByEstado(estado);
     }
 }

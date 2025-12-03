@@ -38,24 +38,24 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario", 
+                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario ORDER BY c.createdAt DESC",
                     Cuarto.class
-                ).getResultList();
+            ).getResultList();
         } finally {
             em.close();
         }
     }
 
-    // Método para buscar cuarto por ID CON propietario - USANDO JOIN FETCH (CORREGIDO)
+    // Método para buscar cuarto por ID CON propietario - USANDO JOIN FETCH
     public Optional<Cuarto> findById(Integer id) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             TypedQuery<Cuarto> query = em.createQuery(
-                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.idCuarto = :id", 
+                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.idCuarto = :id",
                     Cuarto.class
-                );
+            );
             query.setParameter("id", id);
-            
+
             try {
                 Cuarto cuarto = query.getSingleResult();
                 return Optional.of(cuarto);
@@ -92,11 +92,12 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.idPropietario = :idPropietario", 
-                    Cuarto.class
-                )
-                .setParameter("idPropietario", idPropietario)
-                .getResultList();
+                            "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario " +
+                                    "WHERE c.idPropietario = :idPropietario ORDER BY c.createdAt DESC",
+                            Cuarto.class
+                    )
+                    .setParameter("idPropietario", idPropietario)
+                    .getResultList();
         } finally {
             em.close();
         }
@@ -107,11 +108,11 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.nombreCuarto = :nombreCuarto", 
-                    Cuarto.class
-                )
-                .setParameter("nombreCuarto", nombreCuarto)
-                .getResultList();
+                            "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.nombreCuarto = :nombreCuarto",
+                            Cuarto.class
+                    )
+                    .setParameter("nombreCuarto", nombreCuarto)
+                    .getResultList();
         } finally {
             em.close();
         }
@@ -122,11 +123,12 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.estadoCuarto = :estadoCuarto", 
-                    Cuarto.class
-                )
-                .setParameter("estadoCuarto", estadoCuarto)
-                .getResultList();
+                            "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario " +
+                                    "WHERE c.estadoCuarto = :estadoCuarto ORDER BY c.createdAt DESC",
+                            Cuarto.class
+                    )
+                    .setParameter("estadoCuarto", estadoCuarto)
+                    .getResultList();
         } finally {
             em.close();
         }
@@ -137,10 +139,11 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.estadoCuarto IS NULL OR c.estadoCuarto != 'Ocupado'", 
-                    Cuarto.class
-                )
-                .getResultList();
+                            "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario " +
+                                    "WHERE c.estadoCuarto = 'disponible' ORDER BY c.createdAt DESC",
+                            Cuarto.class
+                    )
+                    .getResultList();
         } finally {
             em.close();
         }
@@ -151,11 +154,12 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario WHERE c.descripcionCuarto LIKE :texto", 
-                    Cuarto.class
-                )
-                .setParameter("texto", "%" + texto + "%")
-                .getResultList();
+                            "SELECT c FROM Cuarto c LEFT JOIN FETCH c.propietario " +
+                                    "WHERE c.descripcionCuarto LIKE :texto ORDER BY c.createdAt DESC",
+                            Cuarto.class
+                    )
+                    .setParameter("texto", "%" + texto + "%")
+                    .getResultList();
         } finally {
             em.close();
         }
@@ -166,12 +170,12 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                    "SELECT COUNT(c) FROM Cuarto c WHERE c.nombreCuarto = :nombreCuarto AND c.idPropietario = :idPropietario", 
-                    Long.class
-                )
-                .setParameter("nombreCuarto", nombreCuarto)
-                .setParameter("idPropietario", idPropietario)
-                .getSingleResult();
+                            "SELECT COUNT(c) FROM Cuarto c WHERE c.nombreCuarto = :nombreCuarto AND c.idPropietario = :idPropietario",
+                            Long.class
+                    )
+                    .setParameter("nombreCuarto", nombreCuarto)
+                    .setParameter("idPropietario", idPropietario)
+                    .getSingleResult();
             return count > 0;
         } finally {
             em.close();
@@ -183,11 +187,11 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             Long count = em.createQuery(
-                    "SELECT COUNT(c) FROM Cuarto c WHERE c.idPropietario = :idPropietario", 
-                    Long.class
-                )
-                .setParameter("idPropietario", idPropietario)
-                .getSingleResult();
+                            "SELECT COUNT(c) FROM Cuarto c WHERE c.idPropietario = :idPropietario",
+                            Long.class
+                    )
+                    .setParameter("idPropietario", idPropietario)
+                    .getSingleResult();
             return count > 0;
         } finally {
             em.close();
@@ -210,11 +214,27 @@ public class CuartoRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                    "SELECT COUNT(c) FROM Cuarto c WHERE c.idPropietario = :idPropietario", 
-                    Long.class
-                )
-                .setParameter("idPropietario", idPropietario)
-                .getSingleResult();
+                            "SELECT COUNT(c) FROM Cuarto c WHERE c.idPropietario = :idPropietario",
+                            Long.class
+                    )
+                    .setParameter("idPropietario", idPropietario)
+                    .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para verificar existencia de cuarto por ID
+    public boolean existsById(Integer id) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            Long count = em.createQuery(
+                            "SELECT COUNT(c) FROM Cuarto c WHERE c.idCuarto = :id",
+                            Long.class
+                    )
+                    .setParameter("id", id)
+                    .getSingleResult();
+            return count > 0;
         } finally {
             em.close();
         }

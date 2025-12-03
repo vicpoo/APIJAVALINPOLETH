@@ -4,7 +4,8 @@ package com.poleth.api.repository;
 import com.poleth.api.config.DatabaseConfig;
 import com.poleth.api.model.HistorialReporte;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +37,9 @@ public class HistorialReporteRepository {
     public List<HistorialReporte> findAll() {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
-            return em.createQuery("SELECT hr FROM HistorialReporte hr", HistorialReporte.class)
+            return em.createQuery(
+                            "SELECT hr FROM HistorialReporte hr ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .getResultList();
         } finally {
             em.close();
@@ -79,7 +82,8 @@ public class HistorialReporteRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr WHERE hr.idReporte = :idReporte", HistorialReporte.class)
+                            "SELECT hr FROM HistorialReporte hr WHERE hr.idReporte = :idReporte ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .setParameter("idReporte", idReporte)
                     .getResultList();
         } finally {
@@ -92,7 +96,8 @@ public class HistorialReporteRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr WHERE hr.tipoReporteHist = :tipoReporteHist", HistorialReporte.class)
+                            "SELECT hr FROM HistorialReporte hr WHERE hr.tipoReporteHist = :tipoReporteHist ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .setParameter("tipoReporteHist", tipoReporteHist)
                     .getResultList();
         } finally {
@@ -105,7 +110,8 @@ public class HistorialReporteRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr WHERE hr.usuarioRegistro = :usuarioRegistro", HistorialReporte.class)
+                            "SELECT hr FROM HistorialReporte hr WHERE hr.usuarioRegistro = :usuarioRegistro ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .setParameter("usuarioRegistro", usuarioRegistro)
                     .getResultList();
         } finally {
@@ -118,7 +124,8 @@ public class HistorialReporteRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr WHERE hr.descripcionHist LIKE :texto", HistorialReporte.class)
+                            "SELECT hr FROM HistorialReporte hr WHERE hr.descripcionHist LIKE :texto ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .setParameter("texto", "%" + texto + "%")
                     .getResultList();
         } finally {
@@ -131,7 +138,8 @@ public class HistorialReporteRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr WHERE hr.nombreReporteHist LIKE :texto", HistorialReporte.class)
+                            "SELECT hr FROM HistorialReporte hr WHERE hr.nombreReporteHist LIKE :texto ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .setParameter("texto", "%" + texto + "%")
                     .getResultList();
         } finally {
@@ -143,12 +151,18 @@ public class HistorialReporteRepository {
     public Optional<HistorialReporte> findUltimoByReporte(Integer idReporte) {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
-            return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr WHERE hr.idReporte = :idReporte ORDER BY hr.fechaRegistro DESC", HistorialReporte.class)
-                    .setParameter("idReporte", idReporte)
-                    .setMaxResults(1)
-                    .getResultStream()
-                    .findFirst();
+            TypedQuery<HistorialReporte> query = em.createQuery(
+                    "SELECT hr FROM HistorialReporte hr WHERE hr.idReporte = :idReporte ORDER BY hr.fechaRegistro DESC",
+                    HistorialReporte.class);
+            query.setParameter("idReporte", idReporte);
+            query.setMaxResults(1);
+
+            try {
+                HistorialReporte historial = query.getSingleResult();
+                return Optional.of(historial);
+            } catch (NoResultException e) {
+                return Optional.empty();
+            }
         } finally {
             em.close();
         }
@@ -159,7 +173,8 @@ public class HistorialReporteRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr ORDER BY hr.fechaRegistro DESC", HistorialReporte.class)
+                            "SELECT hr FROM HistorialReporte hr ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .getResultList();
         } finally {
             em.close();
@@ -171,8 +186,96 @@ public class HistorialReporteRepository {
         EntityManager em = DatabaseConfig.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT hr FROM HistorialReporte hr WHERE hr.idReporte = :idReporte ORDER BY hr.fechaRegistro DESC", HistorialReporte.class)
+                            "SELECT hr FROM HistorialReporte hr WHERE hr.idReporte = :idReporte ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
                     .setParameter("idReporte", idReporte)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para contar total de historiales
+    public int countTotal() {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            Long count = em.createQuery("SELECT COUNT(hr) FROM HistorialReporte hr", Long.class)
+                    .getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para contar historiales por reporte
+    public int countByReporte(Integer idReporte) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            Long count = em.createQuery(
+                            "SELECT COUNT(hr) FROM HistorialReporte hr WHERE hr.idReporte = :idReporte",
+                            Long.class)
+                    .setParameter("idReporte", idReporte)
+                    .getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para contar historiales por usuario
+    public int countByUsuario(String usuarioRegistro) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            Long count = em.createQuery(
+                            "SELECT COUNT(hr) FROM HistorialReporte hr WHERE hr.usuarioRegistro = :usuarioRegistro",
+                            Long.class)
+                    .setParameter("usuarioRegistro", usuarioRegistro)
+                    .getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para contar historiales por tipo
+    public int countByTipo(String tipoReporteHist) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            Long count = em.createQuery(
+                            "SELECT COUNT(hr) FROM HistorialReporte hr WHERE hr.tipoReporteHist = :tipoReporteHist",
+                            Long.class)
+                    .setParameter("tipoReporteHist", tipoReporteHist)
+                    .getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para buscar historiales en un rango de fechas
+    public List<HistorialReporte> findByFechaBetween(java.time.LocalDateTime fechaInicio,
+                                                     java.time.LocalDateTime fechaFin) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT hr FROM HistorialReporte hr WHERE hr.fechaRegistro BETWEEN :fechaInicio AND :fechaFin ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
+                    .setParameter("fechaInicio", fechaInicio)
+                    .setParameter("fechaFin", fechaFin)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Método para obtener los N historiales más recientes
+    public List<HistorialReporte> findRecientes(int limite) {
+        EntityManager em = DatabaseConfig.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT hr FROM HistorialReporte hr ORDER BY hr.fechaRegistro DESC",
+                            HistorialReporte.class)
+                    .setMaxResults(limite)
                     .getResultList();
         } finally {
             em.close();
