@@ -1,6 +1,6 @@
-// Pago.java
 package com.poleth.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,11 +34,13 @@ public class Pago {
     @Column(name = "estado_pago", length = 20)
     private String estadoPago = "completado";
 
-    // Relaciones Many-to-One (opcionales)
+    // ✅ Relaciones con @JsonIgnore para evitar LazyInitializationException
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_contrato", referencedColumnName = "id_contrato", insertable = false, updatable = false)
     private Contrato contrato;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_inquilino", referencedColumnName = "id_usuario", insertable = false, updatable = false)
     private Usuario inquilino;
